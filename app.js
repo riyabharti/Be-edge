@@ -5,8 +5,9 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const cors=require('cors')
 const mongoose=require('mongoose')
-const uri = 'mongodb+srv://newDB:passDB@cluster0-fpypq.mongodb.net/e-edge?retryWrites=true&w=majority';
-mongoose.connect(uri, {
+require('dotenv').config();
+
+mongoose.connect(process.env.DBurl, {
   useNewUrlParser: true,
   useCreateIndex: true, 
   useUnifiedTopology: true, 
