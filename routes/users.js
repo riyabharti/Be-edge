@@ -3,6 +3,7 @@ const path = require('path');
 const jwt = require('jsonwebtoken');
 
 var User=require('../model/userDetails');
+const Auth = require('../middlewares/auth');
 
 var express = require('express');
 var router = express.Router();
@@ -102,8 +103,8 @@ router.post('/login',function(req,res){
 })
 
 //Event Registration
-router.post('/eventRegister',function(req,res){
-  User.findOne({email : req.body.email}, (err,item) => {
+router.post('/eventRegister',Auth.authenticateAll,function(req,res){
+  User.findOne({email : req.user.email}, (err,item) => {
     if (err)
     {
       console.log(err);
@@ -121,13 +122,13 @@ router.post('/eventRegister',function(req,res){
         res.status(200).json({
           'status':true,
           'message':"Event Registration successful",
-          'data':data
+          'user':data
         })
       }).catch(err=> {
         res.status(200).json({
           'status':false,
           'message':"Event Registration failed",
-          'data':err
+          'error':err
         })
       })
     }

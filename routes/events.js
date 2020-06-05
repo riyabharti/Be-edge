@@ -1,9 +1,10 @@
 var Category = require('../model/categoryEventDetails');
 var express = require('express');
 var router = express.Router();
+const Auth = require('../middlewares/auth');
 
 /* GET events listing. */
-router.get('/', function(req, res, next) {
+router.get('/',Auth.authenticateAll, function(req, res, next) {
     Category.find({},(err,item)=>{
         if(err)
         {
@@ -23,7 +24,7 @@ router.get('/', function(req, res, next) {
 });
 
 //Add Events
-router.post('/addEvent', function(req,res){
+router.post('/addEvent',Auth.authenticateAdmin, function(req,res){
     Category.findOne({category: req.body.category},(err,data)=>{
         if (err)
         {
