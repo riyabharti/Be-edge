@@ -9,13 +9,30 @@ var router = express.Router();
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
+  res.send('respond with a resource Link incomplete!');
+});
+
+//Fetch All Emails
+router.get("/fetchEmails", (req, res) => {
+  User.find({}, {email: 1}, (err, users) => {
+    if (err)
+      return res.status(500).json({
+        status: false,
+        message: "Fetching Emails Failed! Server Error..",
+        error: err
+      });
+    return res.status(200).json({
+      status: true,
+      message: "Fetched successfully",
+      user: users
+    });
+  });
 });
 
 //Register User
 router.post('/register',function(req,res){
   var newUser=req.body;
-  console.log(newUser);
+  newUser.events = {'noregister': true};
   newUser.password=sha1(req.body.password);
   var user=new User(newUser);
   user.save().then(item=>{
@@ -33,6 +50,7 @@ router.post('/register',function(req,res){
   })
 })
 
+//Login
 router.post('/login',function(req,res){
   User.findOne({email: req.body.username},(err,item)=>{
     if (err)
@@ -79,6 +97,57 @@ router.post('/login',function(req,res){
           message: "Incorrect password"
         })
       }
+    }
+  })
+})
+
+//Event Registration
+router.post('/eventRegister',function(req,res){
+  User.findOne({email : req.body.email}, (err,item) => {
+    if (err)
+    {
+      console.log(err);
+      return res.status(500).json({
+        status: false,
+        message: "Event Register Failed! Server Error..",
+        error: err
+      });
+    }
+    if(item.total == 0)
+    {
+      item.events=req.body.registerEvents;
+      item.total=req.body.total;
+      item.save().then(data=> {
+        res.status(200).json({
+          'status':true,
+          'message':"Event Registration successful",
+          'data':data
+        })
+      }).catch(err=> {
+        res.status(200).json({
+          'status':false,
+          'message':"Event Registration failed",
+          'data':err
+        })
+      })
+    }
+    else
+    {
+      item.events=req.body.registerEvents;
+      item.total=req.body.total;
+      item.save().then(data=> {
+        res.status(200).json({
+          'status':true,
+          'message':"Event Registration successful",
+          'data':data
+        })
+      }).catch(err=> {
+        res.status(200).json({
+          'status':false,
+          'message':"Event Registration failed",
+          'data':err
+        })
+      })
     }
   })
 })

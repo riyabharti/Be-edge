@@ -38,6 +38,14 @@ var userSchema=new Schema({
     "admin": {
         type: Boolean,
         default: false
+    },
+    "events": {
+        type: Object,
+        default: {}
+    },
+    "total": {
+        type: Number,
+        default: 0
     }
 },{timestamps: true});
 
