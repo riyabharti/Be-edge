@@ -24,6 +24,10 @@ var categorySchema = new Schema({
         "fees": {
             type: Number,
             required: true
+        },
+        "couponApplicable": {
+            type: Boolean,
+            default: false
         }
     }]
     

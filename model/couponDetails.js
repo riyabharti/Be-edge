@@ -14,10 +14,6 @@ var couponSchema = new Schema({
         type: String,
         required: true,
         unique: true
-    },
-    "events": {
-        type: Object,
-        required: true
     }
 },{timestamps: true});
 
