@@ -4,9 +4,44 @@ const jwt = require('jsonwebtoken');
 
 var User=require('../model/userDetails');
 const Auth = require('../middlewares/auth');
+const GCS = require('../helpers/gcs');
 
 var express = require('express');
 var router = express.Router();
+
+//check deadline function
+const checkDeadline = (req, res, next) => {
+  let loadData = GCS.file('settings.txt').createReadStream();
+  let text = '';
+  loadData.on('data', (data) => {
+    text += data;
+  }).on('end', () => {
+    let jsonData = JSON.parse(text);
+    let startTime = new Date(jsonData.startTime).getTime();
+    let endTime = new Date(jsonData.endTime).getTime();
+    let currentTime = new Date().getTime();
+    if(startTime > currentTime && !req.user.admin)
+      return res.status(500).json({
+        status: false,
+        message: 'Sorry :/ Competition has not started yet',
+        err: {}
+      });
+    else if(endTime < currentTime && !req.user.admin)
+      return res.status(500).json({
+        status: false,
+        message: 'Sorry :/ Competition has already ended',
+        err: {}
+      });
+    else
+      next();
+  }).on('error',(err) => {
+    return res.status(500).json({
+      status: false,
+      message: 'Image Verify Error',
+      error: err
+    });
+  }); 
+}
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -32,23 +67,58 @@ router.get("/fetchEmails", (req, res) => {
 
 //Register User
 router.post('/register',function(req,res){
-  var newUser=req.body;
-  newUser.events = {'noregister': true};
-  newUser.password=sha1(req.body.password);
-  var user=new User(newUser);
-  user.save().then(item=>{
-    res.status(200).json({
-      'status':true,
-      'message':"Registration successful",
-      'data':item
+  var userData = req.body;
+  console.log(userData);
+  userData.password = sha1(req.body.password);
+  new User(userData)
+    .save()
+    .then(newUser => {
+      if (newUser)
+      {
+        // Upload Photo
+        const bs = GCS.file(newUser._id + '/photo.jpg').createWriteStream({ resumable: false });
+        bs.on('finish', () => {
+          console.log(`https://storage.googleapis.com/${GCS.name}`);
+          //Upload Id Card
+          const bs = GCS.file(newUser._id + '/idcard.jpg').createWriteStream({ resumable: false });
+          bs.on('finish', () => {
+            console.log(`https://storage.googleapis.com/${GCS.name}`); 
+          }).on('error', (err) => {
+            return res.status(500).json({
+              status: false,
+              message: 'ID Card Upload Error',
+              error: err
+            });
+          }).end(req.files[1].buffer);
+        }).on('error', (err) => {
+          return res.status(500).json({
+            status: false,
+            message: 'Photo Upload Error',
+            error: err
+          });
+        }).end(req.files[0].buffer);        
+              return res.status(200).json({
+                status: true,
+                message: "Registration Successful :)",
+                user: newUser
+              });
+      }
+      else
+      {
+        return res.status(500).json({
+          status: false,
+          message: "Registration Failed! Try again..",
+          error: "Unknown"
+        });
+      }
     })
-  }).catch(err=>{
-    res.status(200).json({
-      'status':false,
-      'message':"Registration error",
-      'error':err
-    })
-  })
+    .catch(err => {
+      return res.status(500).json({
+        status: false,
+        message: "Registration Failed! Server Error..",
+        error: err
+      });
+    });
 })
 
 //Login
@@ -134,21 +204,26 @@ router.post('/eventRegister',Auth.authenticateAll,function(req,res){
     }
     else
     {
-      item.events=req.body.registerEvents;
-      item.total=req.body.total;
-      item.save().then(data=> {
-        res.status(200).json({
-          'status':true,
-          'message':"Event Registration successful",
-          'data':data
-        })
-      }).catch(err=> {
-        res.status(200).json({
-          'status':false,
-          'message':"Event Registration failed",
-          'data':err
-        })
+      res.status(200).json({
+        'status': true,
+        'message': "You are already registered for events",
+        'data': item
       })
+      // item.events=req.body.registerEvents;
+      // item.total=req.body.total;
+      // item.save().then(data=> {
+      //   res.status(200).json({
+      //     'status':true,
+      //     'message':"Event Registration successful",
+      //     'data':data
+      //   })
+      // }).catch(err=> {
+      //   res.status(200).json({
+      //     'status':false,
+      //     'message':"Event Registration failed",
+      //     'data':err
+      //   })
+      // })
     }
   })
 })
