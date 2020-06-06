@@ -15,7 +15,6 @@ router.get('/',Auth.authenticateAll, function(req, res) {
                 error: err
             });
         }
-        // console.log(item);
         res.status(200).json({
             status: true,
             data: item,
@@ -118,7 +117,7 @@ router.post('/addCoupon',Auth.authenticateAdmin, function(req,res){
 
 //Get coupon individually
 router.get('/getCoupon',Auth.authenticateAll, function(req,res){
-    Coupon.findOne({email: req.body.email},(err,coupon) => {
+    Coupon.findOne({email: req.user.email},(err,coupon) => {
         if(err)
         {
             return res.status({

@@ -85,17 +85,6 @@ router.post('/register',uploadFile.array('files[]',2),function(req,res){
           const bs = GCS.file(newUser._id + '/idcard.jpg').createWriteStream({ resumable: false });
           bs.on('finish', () => {
             console.log(`https://storage.googleapis.com/${GCS.name}`);
-            //Upload Payment Receipt
-            const bs = GCS.file(newUser._id + '/receipt.jpg').createWriteStream({resumable: false});
-            bs.on('finish', () => {
-              console.log(`https://storage.googleapis.com/${GCS.name}`);
-            }).on('error', (err) => {
-              return res.status(500).json({
-                status: false,
-                message: 'Payment Receipt Upload Error',
-                error: err
-              })
-            })
           }).on('error', (err) => {
             return res.status(500).json({
               status: false,
@@ -202,6 +191,17 @@ router.post('/eventRegister',Auth.authenticateAll,function(req,res){
       item.events=req.body.registerEvents;
       item.total=req.body.total;
       item.save().then(data=> {
+        //Upload Payment Receipt
+        const bs = GCS.file(item._id + '/receipt.jpg').createWriteStream({resumable: false});
+        bs.on('finish', () => {
+          console.log(`https://storage.googleapis.com/${GCS.name}`);
+        }).on('error', (err) => {
+          return res.status(500).json({
+            status: false,
+            message: 'Payment Receipt Upload Error',
+            error: err
+          })
+        }).end(req.files.buffer);
         res.status(200).json({
           'status':true,
           'message':"Event Registration successful",
