@@ -1,16 +1,17 @@
 var Category = require('../model/categoryEventDetails');
+var Coupon = require('../model/couponDetails');
 var express = require('express');
 var router = express.Router();
 const Auth = require('../middlewares/auth');
 
 /* GET events listing. */
-router.get('/',Auth.authenticateAll, function(req, res, next) {
+router.get('/',Auth.authenticateAll, function(req, res) {
     Category.find({},(err,item)=>{
         if(err)
         {
             return res.status(500).json({
                 status: false,
-                message: "Login Failed! Server Error..",
+                message: "Events loading Failed! Server Error..",
                 error: err
             });
         }
@@ -31,7 +32,7 @@ router.post('/addEvent',Auth.authenticateAdmin, function(req,res){
             console.log(err);
             return res.status(500).json({
                 status: false,
-                message: "Login Failed! Server Error..",
+                message: "Add Event Failed! Server Error..",
                 error: err
             });
         }
@@ -64,6 +65,75 @@ router.post('/addEvent',Auth.authenticateAdmin, function(req,res){
     })   
 });
 
+//Get All Coupons
+router.get('/getAllCoupons',Auth.authenticateAll, function(req,res){
+    Coupon.find({},(err,item) => {
+        if(err)
+        {
+            return res.status(500).json({
+                status: false,
+                message: "Coupon loading Failed! Server Error..",
+                error: err
+            });
+        }
+        return res.status(200).json({
+            status: true,
+            message: "Coupon loading successful",
+            coupons: item
+        })
+    })
+})
+
+//Add Coupon
+router.post('/addCoupon',Auth.authenticateAdmin, function(req,res){
+    var couponData = req.body;
+    new Coupon(couponData).save().then(
+        newCoupon => {
+            if(newCoupon)
+            {
+                return res.status(200).json({
+                    status: true,
+                    message: "Coupon added successfully :)",
+                    coupon: newCoupon
+                });
+            }
+            else
+            {
+                return res.status(500).json({
+                    status: false,
+                    message: "Coupon addition",
+                    error: "Unknown"
+                });
+            }
+        },
+    )
+    .catch(err => {
+        return res.status(500).json({
+          status: false,
+          message: "Coupon Addition Failed! Server Error..",
+          error: err
+        });
+    });
+})
+
+//Get coupon individually
+router.get('/getCoupon',Auth.authenticateAll, function(req,res){
+    Coupon.findOne({email: req.body.email},(err,coupon) => {
+        if(err)
+        {
+            return res.status({
+                status: false,
+                message: "Fetching Coupon Failed! Server Error..",
+                error: err
+            })
+        }
+        return res.status(200).json({
+            status: true,
+            message: "Fetched successfully",
+            coupon: coupon
+        });
+    })
+})
 
 module.exports=router;
 

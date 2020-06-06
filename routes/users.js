@@ -1,5 +1,6 @@
 const sha1 = require("sha1");
 const path = require('path');
+const multer = require('multer');
 const jwt = require('jsonwebtoken');
 
 var User=require('../model/userDetails');
@@ -8,6 +9,8 @@ const GCS = require('../helpers/gcs');
 
 var express = require('express');
 var router = express.Router();
+
+const uploadFile = multer({ storage: multer.memoryStorage() });
 
 //check deadline function
 const checkDeadline = (req, res, next) => {
@@ -66,13 +69,12 @@ router.get("/fetchEmails", (req, res) => {
 });
 
 //Register User
-router.post('/register',function(req,res){
+router.post('/register',uploadFile.array('files[]',2),function(req,res){
   var userData = req.body;
   console.log(userData);
   userData.password = sha1(req.body.password);
-  new User(userData)
-    .save()
-    .then(newUser => {
+  new User(userData).save().then(
+    newUser => {
       if (newUser)
       {
         // Upload Photo
@@ -123,7 +125,7 @@ router.post('/register',function(req,res){
 
 //Login
 router.post('/login',function(req,res){
-  User.findOne({email: req.body.username},(err,item)=>{
+  User.findOne({email: req.body.email},(err,item)=>{
     if (err)
     {
       console.log(err);
