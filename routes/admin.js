@@ -240,5 +240,48 @@ router.post('/deleteEvent',Auth.authenticateAdmin,function(req,res){
     })
 })
 
+//Delete User
+router.get("/deleteUser/:id", Auth.authenticateAdmin, (req, res) => {
+    User.findByIdAndRemove(req.params.id, (err, deletedUser) => {
+      if (err)
+        return res.status(500).json({
+          status: false,
+          message: "Deleting User Failed! Server Error..",
+          error: err
+        });
+      if(deletedUser) {
+        let deletUser = async() => {
+          const [files] = await GCS.getFiles({ prefix: req.params.id+'/' });
+          let error = false;
+          files.forEach(async (file) => {
+            try {
+              await file.delete();
+            } catch(err) {
+              error = true;
+            }
+          })
+          return res.status(200).json({
+            status: true,
+            message: "Deleted successfully",
+            user: deletedUser
+          });
+        }
+        deletUser().catch(err => {
+          return res.status(500).json({
+            status: false,
+            message: 'Cannot Delete User Files',
+            error: err
+          });
+        });
+      }
+      else
+        return res.status(500).json({
+          status: false,
+          message: "Deletion Failed",
+          error: 'Unknown'
+        });
+    });
+});
+
 module.exports=router;
 
