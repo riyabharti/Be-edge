@@ -31,6 +31,11 @@ router.get('/getBanner', (req, res) => {
     GCS.file('banner.jpg').createReadStream().pipe(res);
 });
 
+router.get('/getFile/:uid/:file', (req, res) => {
+    res.attachment(req.params.file);
+    GCS.file(req.params.uid + '/' + req.params.file).createReadStream().pipe(res);
+});
+
 //  Get all events .
 router.get('/getAllEvents',Auth.authenticateAll, function(req, res) {
     Category.find({},(err,item)=>{
