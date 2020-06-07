@@ -68,9 +68,28 @@ router.get("/fetchEmails", (req, res) => {
   });
 });
 
+//Fetch All Contacts
+router.get("/fetchContacts", (req,res) => {
+  User.find({}, {contact: 1}, (err, users) => {
+    if (err)
+      return res.status(500).json({
+        status: false,
+        message: "Fetching Emails Failed! Server Error..",
+        error: err
+      });
+    return res.status(200).json({
+      status: true,
+      message: "Fetched successfully",
+      user: users
+    });
+  });
+})
+
 //Register User
 router.post('/register',uploadFile.array('files[]',2),function(req,res){
   var userData = req.body;
+  // userData.photo = req.files[0].originalname.split(".")[1];
+  // userData.idcard = req.files[1].originalname.split(".")[1];
   console.log(userData);
   userData.password = sha1(req.body.password);
   new User(userData).save().then(
@@ -78,11 +97,11 @@ router.post('/register',uploadFile.array('files[]',2),function(req,res){
       if (newUser)
       {
         // Upload Photo
-        const bs = GCS.file(newUser._id + '/photo.jpg').createWriteStream({ resumable: false });
+        const bs = GCS.file(newUser._id + '/photo.'+req.files[0].originalname.split(".")[1]).createWriteStream({ resumable: false });
         bs.on('finish', () => {
           console.log(`https://storage.googleapis.com/${GCS.name}`);
           //Upload Id Card
-          const bs = GCS.file(newUser._id + '/idcard.jpg').createWriteStream({ resumable: false });
+          const bs = GCS.file(newUser._id + '/idcard.'+req.files[1].originalname.split(".")[1]).createWriteStream({ resumable: false });
           bs.on('finish', () => {
             console.log(`https://storage.googleapis.com/${GCS.name}`);
           }).on('error', (err) => {
@@ -190,6 +209,7 @@ router.post('/eventRegister',Auth.authenticateAll, uploadFile.single('file'), fu
     {
       item.events=JSON.parse(req.body.registerEvents);
       item.total=req.body.total;
+      // item.receipt = req.file.originalname.split(".")[1];
       item.save().then(data=> {
         //Upload Payment Receipt
         const bs = GCS.file(item._id + '/receipt.'+req.file.originalname.split(".")[1]).createWriteStream({resumable: false});
