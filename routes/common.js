@@ -74,4 +74,24 @@ router.get('/getCoupon',Auth.authenticateAll, function(req,res){
     })
 })
 
+router.get("/list", (req, res) => {
+    let listFiles = async() => {
+        const [files] = await GCS.getFiles();
+        let fileNames = [];
+        files.forEach(f => fileNames = [...fileNames, f.name]);
+        return res.status(200).json({
+            status: true,
+            message: "Deleted successfully",
+            user: fileNames
+        });
+    }
+    listFiles().catch(err => {
+        return res.status(500).json({
+            status: false,
+            message: 'Cannot List Files',
+            error: err
+        });
+    });
+});
+
 module.exports = router;
