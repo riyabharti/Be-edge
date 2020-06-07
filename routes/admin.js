@@ -1,27 +1,10 @@
 var Category = require('../model/categoryEventDetails');
 var Coupon = require('../model/couponDetails');
+var User = require('../model/userDetails');
 var express = require('express');
 var router = express.Router();
 const Auth = require('../middlewares/auth');
 
-/* GET events listing. */
-router.get('/',Auth.authenticateAll, function(req, res) {
-    Category.find({},(err,item)=>{
-        if(err)
-        {
-            return res.status(500).json({
-                status: false,
-                message: "Events loading Failed! Server Error..",
-                error: err
-            });
-        }
-        res.status(200).json({
-            status: true,
-            data: item,
-            message: "Events fetched successfully"
-        })
-    })
-});
 
 //Add Events
 router.post('/addEvent',Auth.authenticateAdmin, function(req,res){
@@ -64,25 +47,6 @@ router.post('/addEvent',Auth.authenticateAdmin, function(req,res){
     })   
 });
 
-//Get All Coupons
-router.get('/getAllCoupons',Auth.authenticateAll, function(req,res){
-    Coupon.find({},(err,item) => {
-        if(err)
-        {
-            return res.status(500).json({
-                status: false,
-                message: "Coupon loading Failed! Server Error..",
-                error: err
-            });
-        }
-        return res.status(200).json({
-            status: true,
-            message: "Coupon loading successful",
-            coupons: item
-        })
-    })
-})
-
 //Add Coupon
 router.post('/addCoupon',Auth.authenticateAdmin, function(req,res){
     var couponData = req.body;
@@ -115,24 +79,44 @@ router.post('/addCoupon',Auth.authenticateAdmin, function(req,res){
     });
 })
 
-//Get coupon individually
-router.get('/getCoupon',Auth.authenticateAll, function(req,res){
-    Coupon.findOne({email: req.user.email},(err,coupon) => {
+//Get All Coupons
+router.get('/getAllCoupons',Auth.authenticateAdmin, function(req,res){
+    Coupon.find({},(err,item) => {
         if(err)
         {
-            return res.status({
+            return res.status(500).json({
                 status: false,
-                message: "Fetching Coupon Failed! Server Error..",
+                message: "Coupon loading Failed! Server Error..",
                 error: err
-            })
+            });
         }
         return res.status(200).json({
             status: true,
-            message: "Fetched successfully",
-            coupon: coupon
+            message: "Coupon loading successful",
+            coupons: item
+        })
+    })
+})
+
+//Fetch All Users
+router.get('/fetchUsers',Auth.authenticateAdmin, function(req,res){
+    User.find({},(err,users)=> {
+        if (err)
+        {
+            return res.status(500).json({
+                status: false,
+                message: "Fetching Users Failed! Server Error..",
+                error: err
+            });
+        }
+        return res.status(200).json({
+        status: true,
+        message: "Fetched successfully",
+        users: users
         });
     })
 })
+
 
 module.exports=router;
 

@@ -21,7 +21,7 @@ mongoose.Promise = global.Promise;
 
 // var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-var eventsRouter = require('./routes/events');
+var adminRouter = require('./routes/admin');
 var commonRouter = require('./routes/common');
 
 var app = express();
@@ -39,7 +39,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/events', eventsRouter);
+app.use('/admin', adminRouter);
 app.use('/common', commonRouter);
 
 app.get('*',function(req,res){
