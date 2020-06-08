@@ -4,6 +4,7 @@ var User = require('../model/userDetails');
 var express = require('express');
 var router = express.Router();
 const Auth = require('../middlewares/auth');
+const sha1 = require("sha1");
 
 
 //Add Events
@@ -282,6 +283,82 @@ router.get("/deleteUser/:id", Auth.authenticateAdmin, (req, res) => {
         });
     });
 });
+
+//Reset Password
+router.post("/resetPassword",Auth.authenticateAdmin, (req,res)=> {
+    User.findById(req.body.id, (err,item) => {
+        if (err)
+        return res.status(500).json({
+          status: false,
+          message: "Reset Password Failed! Server Error..",
+          error: err
+        });
+        if(item)
+        {
+            item.password = sha1(req.body.password);
+            item.save().then(data => {
+                return res.status(200).json({
+                    status: true,
+                    message: "Password Reset successful",
+                    data: data
+                })
+            })
+            .catch(err=> {
+                return res.status(500).json({
+                    status: false,
+                    message: "Save Password Failed! Server Error..",
+                    error: err
+                });
+            })
+        }
+        else
+        {
+            return res.status(500).json({
+                status: false,
+                message: "User does not exist",
+                error: "User find error"
+            });
+        }
+    })
+})
+
+//Verify  User
+router.get("/verifyUser/:id",Auth.authenticateAdmin, (req,res) => {
+    User.findById(req.params.id, (err,item) => {
+        if (err)
+        return res.status(500).json({
+          status: false,
+          message: "Verify User Failed! Server Error..",
+          error: err
+        });
+        if(item)
+        {
+            item.verified = true;
+            item.save().then(data => {
+                return res.status(200).json({
+                    status: true,
+                    message: "User verified successfully",
+                    data: data
+                })
+            })
+            .catch(err=> {
+                return res.status(500).json({
+                    status: false,
+                    message: "User Verification Failed! Server Error..",
+                    error: err
+                });
+            })
+        }
+        else
+        {
+            return res.status(500).json({
+                status: false,
+                message: "User does not exist",
+                error: "User find error"
+            });
+        }
+    })
+})
 
 module.exports=router;
 
