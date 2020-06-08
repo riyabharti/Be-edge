@@ -5,6 +5,7 @@ var express = require('express');
 var router = express.Router();
 const Auth = require('../middlewares/auth');
 const sha1 = require("sha1");
+const GCS = require('../helpers/gcs');
 
 
 //Add Events
@@ -268,6 +269,7 @@ router.get("/deleteUser/:id", Auth.authenticateAdmin, (req, res) => {
           });
         }
         deletUser().catch(err => {
+            console.log(err);
           return res.status(500).json({
             status: false,
             message: 'Cannot Delete User Files',
