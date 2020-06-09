@@ -90,7 +90,6 @@ router.post('/register',uploadFile.single('file'),function(req,res){
   var userData = req.body;
   userData.photo = req.file.originalname.split(".")[1];
   // userData.idcard = req.files[1].originalname.split(".")[1];
-  console.log(userData);
   userData.password = sha1(req.body.password);
   new User(userData).save().then(
     newUser => {
