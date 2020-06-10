@@ -54,6 +54,10 @@ var userSchema=new Schema({
     "receipt": {
         type: String,
         default: ""
+    },
+    "couponApplied": {
+        type: Boolean,
+        default: false
     }
 },{timestamps: true});
 

@@ -28,6 +28,10 @@ var categorySchema = new Schema({
         "couponApplicable": {
             type: Boolean,
             default: false
+        },
+        "extra": {
+            type: Boolean,
+            default: false
         }
     }]
     
