@@ -27,8 +27,8 @@ router.get('/getSettings', (req, res) => {
 });
   
 router.get('/getBanner', (req, res) => {
-    res.attachment('banner.jpg');
-    GCS.file('banner.jpg').createReadStream().pipe(res);
+    res.attachment('banner.png');
+    GCS.file('banner.png').createReadStream().pipe(res);
 });
 
 router.get('/getFile/:uid/:file', (req, res) => {
