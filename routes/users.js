@@ -94,32 +94,17 @@ router.post('/register',uploadFile.single('file'),function(req,res){
   new User(userData).save().then(
     newUser => {
       if (newUser)
-      {
-        // Upload Photo
-        const bs = GCS.file(newUser._id + '/photo.'+req.file.originalname.split(".")[1]).createWriteStream({ resumable: false });
-        bs.on('finish', () => {
-          console.log(`https://storage.googleapis.com/${GCS.name}`);
-          return res.status(200).json({
-            status: true,
-            message: "Registration Successful :)",
-            user: newUser
-          });
-        }).on('error', (err) => {
-          return res.status(500).json({
-            status: false,
-            message: 'Photo Upload Error',
-            error: err
-          });
-        }).end(req.file.buffer);        
-      }
+        return res.status(200).json({
+          status: true,
+          message: "Registration Successful :)",
+          user: newUser
+        });
       else
-      {
         return res.status(500).json({
           status: false,
           message: "Registration Failed! Try again..",
           error: "Unknown"
         });
-      }
     })
     .catch(err => {
       return res.status(500).json({

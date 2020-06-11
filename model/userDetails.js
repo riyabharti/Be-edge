@@ -47,10 +47,6 @@ var userSchema=new Schema({
         type: Number,
         default: 0
     },
-    "photo": {
-        type: String,
-        required: true
-    },
     "receipt": {
         type: String,
         default: ""
