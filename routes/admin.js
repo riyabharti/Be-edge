@@ -41,6 +41,10 @@ router.post('/addEvent',Auth.authenticateAdmin, function(req,res){
         }
         else
         {
+            let events = req.body.events;
+            events.forEach(e => {
+                e._id = Date.now()+""
+            })
             data.events=[...data.events,...req.body.events];
             data.save().then(item=> {
                 res.status(200).json({

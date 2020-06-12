@@ -12,30 +12,26 @@ var categorySchema = new Schema({
     },
     "events": [
     {
+        "_id": {
+            type: String
+        },
         "name": {
-            type: String,
-            required: true,
-            unique: true
+            type: String
         },
         "description": {
-            type: String,
-            required: true
+            type: String
         },
         "fees": {
-            type: Number,
-            required: true
+            type: Number
         },
         "couponApplicable": {
-            type: Boolean,
-            default: false
+            type: Boolean
         },
         "extra": {
-            type: Boolean,
-            default: false
+            type: Boolean
         },
         "extraMoney": {
-            type: Number,
-            default: 0
+            type: Number
         }
     }]
     
