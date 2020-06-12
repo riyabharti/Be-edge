@@ -343,7 +343,7 @@ router.get("/verifyUser/:id",Auth.authenticateAdmin, (req,res) => {
         if (err)
         return res.status(500).json({
           status: false,
-          message: "Verify User Failed! Server Error..",
+          message: "Verify/Unverify User Failed! Server Error..",
           error: err
         });
         if(item)
@@ -380,6 +380,66 @@ router.get("/verifyUser/:id",Auth.authenticateAdmin, (req,res) => {
                 status: false,
                 message: "User does not exist",
                 error: "User find error"
+            });
+        }
+    })
+})
+
+//Show or Hide Event
+router.post('/showHideEvent',Auth.authenticateAdmin,function(req,res){
+    Category.findOne({category: req.body.category}, (err,item)=> {
+        if(err)
+        {
+            console.log("Show/Hide Event Failed",err);
+            return res.status(500).json({
+                status: false,
+                message: "Show/Hide Event Failed! Server Error..",
+                error: err
+            });
+        }
+        if(item)
+        {
+            if(item.events[req.body.index].name == req.body.eventName)
+            {
+                var msg="Visible";
+                if (item.events[req.body.index].show)
+                {
+                    msg = "Hidden";
+                }
+                item.events[req.body.index].show = !item.events[req.body.index].show;
+                item.save().then(item => {
+                    return res.status(200).json({
+                        status: true,
+                        message: "Event is "+msg+" now",
+                        data: item
+                    });
+                })
+                .catch(err2 => {
+                    console.log("Show/Hide Event Failed",err2);
+                    return res.status(500).json({
+                        status: false,
+                        message: "Show/Hide Event Failed",
+                        error: err2
+                    });
+                })
+            }
+            else
+            {
+                console.log("Show/Hide Event Failed::INVALID");
+                return res.status(500).json({
+                    status: false,
+                    message: "Show/Hide Event Failed",
+                    error: 'Wrong event details'
+                });
+            }
+        }
+        else
+        {
+            console.log("Show/Hide Event Failed::FIND");
+            return res.status(500).json({
+                status: false,
+                message: "Category does not exist!",
+                error: 'Category find error'
             });
         }
     })

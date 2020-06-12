@@ -32,6 +32,9 @@ var categorySchema = new Schema({
         },
         "extraMoney": {
             type: Number
+        },
+        'show': {
+            type: Boolean
         }
     }]
     
