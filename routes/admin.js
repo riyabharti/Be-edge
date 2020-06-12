@@ -14,7 +14,6 @@ router.post('/addEvent',Auth.authenticateAdmin, function(req,res){
         if (err)
         {
             console.log("Event Addition Failed! Try again..",err);
-            console.log(err);
             return res.status(500).json({
                 status: false,
                 message: "Add Event Failed! Server Error..",
@@ -26,7 +25,6 @@ router.post('/addEvent',Auth.authenticateAdmin, function(req,res){
         {
             var newCategoryEvent = new Category(req.body);
             newCategoryEvent.save().then(item => {
-                console.log(item);
                 res.status(200).json({
                     'status':true,
                     'message':"Category Event added",
