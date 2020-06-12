@@ -139,7 +139,7 @@ router.post('/login',function(req,res){
         jwt.sign(
           item.toJSON(),
           process.env.secretKey,
-          { expiresIn : '1h'},
+          { expiresIn : '1d'},
           (err,token)=>{
             if(err) {
               res.status(500).json({
