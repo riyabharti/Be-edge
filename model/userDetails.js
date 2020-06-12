@@ -54,6 +54,9 @@ var userSchema=new Schema({
     "couponApplied": {
         type: Boolean,
         default: false
+    },
+    "upiId": {
+        type: Number
     }
 },{timestamps: true});
 

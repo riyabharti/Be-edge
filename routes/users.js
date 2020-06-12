@@ -182,6 +182,7 @@ router.post('/eventRegister',Auth.authenticateAll, uploadFile.single('file'), fu
     {
       item.events=JSON.parse(req.body.registerEvents);
       item.total=req.body.total;
+      item.upiId=req.body.upiId;
       item.couponApplied = req.body.couponApplied;
       item.receipt = req.file.originalname.split(".")[1];
       item.save().then(data=> {
