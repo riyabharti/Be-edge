@@ -13,6 +13,7 @@ router.post('/addEvent',Auth.authenticateAdmin, function(req,res){
     Category.findOne({category: req.body.category},(err,data)=>{
         if (err)
         {
+            console.log("Event Addition Failed! Try again..",err);
             console.log(err);
             return res.status(500).json({
                 status: false,
@@ -31,11 +32,12 @@ router.post('/addEvent',Auth.authenticateAdmin, function(req,res){
                     'message':"Category Event added",
                     'data':item
                 })
-            }).catch(err=>{
+            }).catch(err2=>{
+                console.log("Event Addition Failed! I Try again..",err2);
                 res.status(200).json({
-                'status':false,
-                'message':"Event addition error",
-                'error':err
+                    'status':false,
+                    'message':"Event addition error",
+                    'error':err2
                 })
             })
         }
@@ -48,11 +50,12 @@ router.post('/addEvent',Auth.authenticateAdmin, function(req,res){
                     'message':"Events added in the category",
                     'data':item
                 })
-            }).catch(err=>{
+            }).catch(err3=>{
+                console.log("Event Addition Failed! II Try again..",err3);
                 res.status(500).json({
-                'status':false,
-                'message':"Event addition error",
-                'error':err
+                    'status':false,
+                    'message':"Event addition error",
+                    'error':err3
                 })
             })
         }
@@ -144,6 +147,7 @@ router.post('/addCategory',Auth.authenticateAdmin,function(req,res){
             }
             else
             {
+                console.log("Category Addition Failed! Try again..");
                 return res.status(500).json({
                     status: false,
                     message: "Category Addition Failed! Try again..",
@@ -153,6 +157,7 @@ router.post('/addCategory',Auth.authenticateAdmin,function(req,res){
         }
     )
     .catch(err => {
+        console.log("Category Addition Failed! Try again..",err);
         return res.status(500).json({
           status: false,
           message: "Category Addition Failed! Server Error..",
@@ -166,6 +171,7 @@ router.post('/deleteCategory',Auth.authenticateAdmin,function(req,res){
     Category.findOneAndRemove({category: req.body.category},(err, deletedCategory) => {
         if (err)
         {
+            console.log("Delete Category Failed",err);
             return res.status(500).json({
                 status: false,
                 message: "Deleting Category Failed! Server Error..",
@@ -182,6 +188,7 @@ router.post('/deleteCategory',Auth.authenticateAdmin,function(req,res){
         }
         else
         {
+            console.log("Delete Category Failed");
             return res.status(500).json({
                 status: false,
                 message: "Delete Category Failed",
@@ -196,6 +203,7 @@ router.post('/deleteEvent',Auth.authenticateAdmin,function(req,res){
     Category.findOne({category: req.body.category}, (err,item)=> {
         if(err)
         {
+            console.log("Delete Event Failed",err);
             return res.status(500).json({
                 status: false,
                 message: "Deleting Event Failed! Server Error..",
@@ -214,16 +222,18 @@ router.post('/deleteEvent',Auth.authenticateAdmin,function(req,res){
                         data: item
                     });
                 })
-                .catch(err => {
+                .catch(err2 => {
+                    console.log("Delete Event Failed",err2);
                     return res.status(500).json({
                         status: false,
                         message: "Delete Event Failed",
-                        error: err
+                        error: err2
                     });
                 })
             }
             else
             {
+                console.log("Delete Event Failed::INVALID");
                 return res.status(500).json({
                     status: false,
                     message: "Delete Event Failed",
@@ -233,6 +243,7 @@ router.post('/deleteEvent',Auth.authenticateAdmin,function(req,res){
         }
         else
         {
+            console.log("Delete Category Failed::FIND");
             return res.status(500).json({
                 status: false,
                 message: "Category does not exist!",
