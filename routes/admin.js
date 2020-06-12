@@ -337,7 +337,7 @@ router.post("/resetPassword",Auth.authenticateAdmin, (req,res)=> {
     })
 })
 
-//Verify  User
+//Verify And Unverify User
 router.get("/verifyUser/:id",Auth.authenticateAdmin, (req,res) => {
     User.findById(req.params.id, (err,item) => {
         if (err)
@@ -348,18 +348,28 @@ router.get("/verifyUser/:id",Auth.authenticateAdmin, (req,res) => {
         });
         if(item)
         {
-            item.verified = true;
+            var msg = "";
+            // item.verified = true;
+            if (item.verified == true)
+            {
+                msg = "User unv";
+            }
+            else
+            {
+                msg = "User v"
+            }
+            item.verified = !item.verified;
             item.save().then(data => {
                 return res.status(200).json({
                     status: true,
-                    message: "User verified successfully",
+                    message: msg+"erified successfully",
                     data: data
                 })
             })
             .catch(err=> {
                 return res.status(500).json({
                     status: false,
-                    message: "User Verification Failed! Server Error..",
+                    message: msg+"erification Failed! Server Error..",
                     error: err
                 });
             })
