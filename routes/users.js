@@ -167,7 +167,7 @@ router.post('/login',function(req,res){
 })
 
 //Event Registration
-router.post('/eventRegister',Auth.authenticateAll, uploadFile.single('file'), function(req,res){
+router.post('/eventRegister',Auth.authenticateAll, uploadFile.array('files[]',2), function(req,res){
   User.findOne({email : req.user.email}, (err,item) => {
     if (err)
     {
@@ -182,26 +182,54 @@ router.post('/eventRegister',Auth.authenticateAll, uploadFile.single('file'), fu
     {
       item.events=JSON.parse(req.body.registerEvents);
       item.total=req.body.total;
+      item.verified = false;
       item.upiId=req.body.upiId;
       item.couponApplied = req.body.couponApplied;
-      item.receipt = req.file.originalname.split(".")[1];
+      item.receipt = req.files[0].originalname.split(".")[1];
+      if(req.files.length > 1)
+      {
+        item.couponPhoto = req.files[1].originalname.split(".")[1];
+      }
       item.save().then(data=> {
         //Upload Payment Receipt
-        const bs = GCS.file(item._id + '/receipt.'+req.file.originalname.split(".")[1]).createWriteStream({resumable: false});
+        const bs = GCS.file(item._id + '/receipt.'+req.files[0].originalname.split(".")[1]).createWriteStream({resumable: false});
         bs.on('finish', () => {
           console.log(`https://storage.googleapis.com/${GCS.name}`);
-          res.status(200).json({
-            'status':true,
-            'message':"Event Registration successful",
-            'user':data
-          })
+          if (req.files.length > 1)
+          {
+            //Upload Coupon Photo 
+            const bs = GCS.file(item._id + '/couponPhoto.'+req.files[1].originalname.split(".")[1]).createWriteStream({resumable: false});
+            bs.on('finish', () => {
+              console.log(`https://storage.googleapis.com/${GCS.name}`);
+              res.status(200).json({
+                'status':true,
+                'message':"Event Registration successful",
+                'msg': "Coupon added",
+                'user':data
+              })
+            }).on('error', (err) => {
+              return res.status(500).json({
+                status: false,
+                message: 'Payment Receipt Upload Error',
+                error: err
+              })
+            }).end(req.files[1].buffer);
+          }
+          else
+          {
+            res.status(200).json({
+              'status':true,
+              'message':"Event Registration successful",
+              'user':data
+            })
+          }
         }).on('error', (err) => {
           return res.status(500).json({
             status: false,
             message: 'Payment Receipt Upload Error',
             error: err
           })
-        }).end(req.file.buffer);
+        }).end(req.files[0].buffer);
       }).catch(err=> {
         res.status(500).json({
           'status':false,

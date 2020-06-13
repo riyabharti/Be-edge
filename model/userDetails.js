@@ -57,6 +57,10 @@ var userSchema=new Schema({
     },
     "upiId": {
         type: Number
+    },
+    "couponPhoto": {
+        type: String,
+        default: ""
     }
 },{timestamps: true});
 
