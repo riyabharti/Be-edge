@@ -55,6 +55,24 @@ router.get('/getAllEvents',Auth.authenticateAll, function(req, res) {
     })
 });
 
+router.get('/getCategory/:id',Auth.authenticateAll, function(req, res) {
+    Category.findOne({_id: req.params.id},(err,item)=>{
+        if(err)
+        {
+            return res.status(500).json({
+                status: false,
+                message: "Category loading Failed! Server Error..",
+                error: err
+            });
+        }
+        res.status(200).json({
+            status: true,
+            data: item,
+            message: "Category fetched successfully"
+        })
+    })
+});
+
 //Get coupon individually
 router.get('/getCoupon',Auth.authenticateAll, function(req,res){
     Coupon.findOne({email: req.user.email},(err,coupon) => {
