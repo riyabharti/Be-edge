@@ -176,22 +176,29 @@ router.post("/eventRegister", Auth.authenticateAll, uploadFile.array("files[]", 
 		}
 		if (item) {
 			var registerEvents = JSON.parse(req.body.registerEvents);
+			console.log(item);
+			let firstRegistration = Object.keys(item.events).length > 0 ? false : true;
+			console.log("Is this first Registration" + firstRegistration);
 			console.log(registerEvents);
-			Object.keys(registerEvents).map(cat => {
-				console.log(registerEvents[cat]);
-				registerEvents[cat].map(event => {
-					if (item.events.hasOwnProperty(cat)) {
-						item.events[cat].push(event);
-					} else {
-						item.events[cat] = [event];
-					}
+			if (!firstRegistration) {
+				Object.keys(registerEvents).map(cat => {
+					console.log(registerEvents[cat]);
+					registerEvents[cat].map(event => {
+						if (item.events.hasOwnProperty(cat)) {
+							item.events[cat].push(event);
+						} else {
+							item.events[cat] = [event];
+						}
+					});
 				});
-      });
-      var len = item.eventRegDetails.total.length - -1;
+			} else {
+				item.events = registerEvents;
+			}
+			var len = item.eventRegDetails.total.length - -1;
 			item.eventRegDetails.total.push(req.body.total);
 			console.log(item.events);
 			item.verified = false;
-      item.eventRegDetails.upiId.push(req.body.upiId);
+			item.eventRegDetails.upiId.push(req.body.upiId);
 			item.couponApplied = item.couponApplied - -req.body.couponApplied;
 			item.eventRegDetails.receipt.push(req.files[0].originalname.split(".")[1]);
 			if (req.files.length > 1) {
@@ -212,7 +219,7 @@ router.post("/eventRegister", Auth.authenticateAll, uploadFile.array("files[]", 
 						.then(data => {
 							//Upload Payment Receipt
 							const bs = GCS.file(
-								item._id + "/receipt"+len+"." + req.files[0].originalname.split(".")[1]
+								item._id + "/receipt" + len + "." + req.files[0].originalname.split(".")[1]
 							).createWriteStream({ resumable: false });
 							bs.on("finish", () => {
 								console.log(`https://storage.googleapis.com/${GCS.name}`);
