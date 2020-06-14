@@ -180,8 +180,24 @@ router.post('/eventRegister',Auth.authenticateAll, uploadFile.array('files[]',2)
     }
     if(item)
     {
-      item.events=JSON.parse(req.body.registerEvents);
-      item.total=req.body.total;
+      var registerEvents = JSON.parse(req.body.registerEvents);
+      var extraEvents = {};
+      var oldEvents = item.events;
+      for (let [cat, newEvents] of Object.entries(registerEvents)) {
+        console.log(cat, newEvents);
+        if(item.events.hasOwnProperty(cat))
+        {
+          console.log(item.events[cat]);
+          extraEvents[cat]=[...oldEvents[cat],...newEvents];
+        }
+        extraEvents[cat]=newEvents;
+      }
+      console.log(extraEvents);
+      item.events = extraEvents;
+      item.total = item.total - (-req.body.total);
+      // item.markModified('events');
+      // item.events=JSON.parse(req.body.registerEvents);
+      // item.total=req.body.total;
       item.verified = false;
       item.upiId=req.body.upiId;
       item.couponApplied = req.body.couponApplied;
