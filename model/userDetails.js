@@ -67,7 +67,7 @@ var userSchema=new Schema({
     // },
     "couponApplied": {
         type: Number,
-        default: 2
+        default: 0
     },
     // "upiId": {
     //     type: Number
