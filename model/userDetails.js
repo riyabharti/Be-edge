@@ -43,21 +43,35 @@ var userSchema=new Schema({
         type: Object,
         default: {}
     },
-    "total": {
-        type: Number,
-        default: 0
+    "eventRegDetails": {
+        "total": {
+            type: Array,
+            default: []
+        },
+        "receipt": {
+            type: Array,
+            default: []
+        },
+        "upiId": {
+            type: Array,
+            default: []
+        }
     },
-    "receipt": {
-        type: String,
-        default: ""
-    },
+    // "total": {
+    //     type: Number,
+    //     default: 0
+    // },
+    // "receipt": {
+    //     type: String,
+    //     default: ""
+    // },
     "couponApplied": {
-        type: Boolean,
-        default: false
+        type: Number,
+        default: 2
     },
-    "upiId": {
-        type: Number
-    },
+    // "upiId": {
+    //     type: Number
+    // },
     "couponPhoto": {
         type: String,
         default: ""

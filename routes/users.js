@@ -176,10 +176,6 @@ router.post("/eventRegister", Auth.authenticateAll, uploadFile.array("files[]", 
 		}
 		if (item) {
 			var registerEvents = JSON.parse(req.body.registerEvents);
-			// var extraEvents = {};
-			// var oldEvents = item.events;
-			// console.log("Yeh h old events");
-			// console.log(oldEvents);
 			console.log(registerEvents);
 			Object.keys(registerEvents).map(cat => {
 				console.log(registerEvents[cat]);
@@ -190,26 +186,14 @@ router.post("/eventRegister", Auth.authenticateAll, uploadFile.array("files[]", 
 						item.events[cat] = [event];
 					}
 				});
-			});
-			// for (let [cat, newEvents] of Object.entries(registerEvents)) {
-			// 	console.log(cat, newEvents);
-			// 	if (item.events.hasOwnProperty(cat)) {
-			// 		console.log(item.events[cat]);
-			// 		extraEvents[cat] = [...oldEvents[cat], ...newEvents];
-			// 	}
-			// 	extraEvents[cat] = newEvents;
-			// }
-			// console.log(extraEvents);
-			// item.events = registerEvents;
-			item.total = item.total - -req.body.total;
+      });
+      var len = item.eventRegDetails.total.length - -1;
+			item.eventRegDetails.total.push(req.body.total);
 			console.log(item.events);
-			// item.markModified('events');
-			// item.events=JSON.parse(req.body.registerEvents);
-			// item.total=req.body.total;
 			item.verified = false;
-			item.upiId = req.body.upiId;
-			item.couponApplied = req.body.couponApplied;
-			item.receipt = req.files[0].originalname.split(".")[1];
+      item.eventRegDetails.upiId.push(req.body.upiId);
+			item.couponApplied = item.couponApplied - -req.body.couponApplied;
+			item.eventRegDetails.receipt.push(req.files[0].originalname.split(".")[1]);
 			if (req.files.length > 1) {
 				item.couponPhoto = req.files[1].originalname.split(".")[1];
 			}
@@ -228,7 +212,7 @@ router.post("/eventRegister", Auth.authenticateAll, uploadFile.array("files[]", 
 						.then(data => {
 							//Upload Payment Receipt
 							const bs = GCS.file(
-								item._id + "/receipt." + req.files[0].originalname.split(".")[1]
+								item._id + "/receipt"+len+"." + req.files[0].originalname.split(".")[1]
 							).createWriteStream({ resumable: false });
 							bs.on("finish", () => {
 								console.log(`https://storage.googleapis.com/${GCS.name}`);
