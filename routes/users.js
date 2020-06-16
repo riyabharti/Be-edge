@@ -296,4 +296,46 @@ router.post("/eventRegister", Auth.authenticateAll, uploadFile.array("files[]", 
 	});
 });
 
+//Change Password
+router.post("/changePassword", Auth.authenticateAll, function(req,res) {
+  User.findById(req.body.id, (err, item) => {
+		if (err) {
+			console.log(err);
+			return res.status(500).json({
+				status: false,
+				message: "Login Failed! Server Error..",
+				error: err
+			});
+		}
+		if (item == null) {
+			res.status(401).json({
+				status: false,
+				message: "User does not exist"
+			});
+		} else {
+			if (item.password == sha1(req.body.oldPassword)) {
+        item.password = sha1(req.body.newPassword);
+        item.save().then(data => {
+          res.status(200).json({
+            status: true,
+            message: "Password Changed for user "+data.name,
+            data: data
+          });
+        }).catch(err => {
+          res.status(401).json({
+            status: false,
+            message: "Error in saving Password",
+            error: err
+          });
+        })
+			} else {
+				res.status(200).json({
+					status: false,
+					message: "Incorrect Old password"
+				});
+			}
+		}
+	});
+})
+
 module.exports = router;
