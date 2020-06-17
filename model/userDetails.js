@@ -57,21 +57,10 @@ var userSchema=new Schema({
             default: []
         }
     },
-    // "total": {
-    //     type: Number,
-    //     default: 0
-    // },
-    // "receipt": {
-    //     type: String,
-    //     default: ""
-    // },
     "couponApplied": {
         type: Number,
         default: 0
     },
-    // "upiId": {
-    //     type: Number
-    // },
     "couponPhoto": {
         type: String,
         default: ""

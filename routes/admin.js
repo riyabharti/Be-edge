@@ -1,6 +1,7 @@
 var Category = require('../model/categoryEventDetails');
 var Coupon = require('../model/couponDetails');
 var User = require('../model/userDetails');
+var Query = require('../model/queryDetails');
 var express = require('express');
 var router = express.Router();
 const Auth = require('../middlewares/auth');
@@ -141,11 +142,31 @@ router.post('/addCategory',Auth.authenticateAdmin,function(req,res){
         item=> {
             if(item)
             {
-                return res.status(200).json({
-                    status: true,
-                    message: "Category Addition successful",
-                    data: item
-                })
+                var queryData = {
+                    categoryId: item._id,
+                    categoryName: item.category
+                }
+                new Query(queryData).save().then(
+                    data=> {
+                        if(data)
+                        {
+                            return res.status(200).json({
+                                status: true,
+                                message: "Category and Query Addition successful",
+                                data: data
+                            })
+                        }
+                        else
+                        {
+                            console.log("Query Addition Failed! Try again..");
+                            return res.status(500).json({
+                                status: false,
+                                message: "Query Addition Failed! Try again..",
+                                error: "Unknown"
+                            });
+                        }
+                    }
+                )
             }
             else
             {
@@ -182,11 +203,34 @@ router.post('/deleteCategory',Auth.authenticateAdmin,function(req,res){
         }
         if(deletedCategory)
         {
-            return res.status(200).json({
-                status: true,
-                message: "Deleted Category successfully",
-                user: deletedCategory
-              });
+            Query.findOneAndRemove({categoryName: req.body.category},(err, deletedQuery) => {
+                if(err)
+                {
+                    console.log("Delete Query Failed",err);
+                    return res.status(500).json({
+                        status: false,
+                        message: "Deleting Query Failed! Server Error..",
+                        error: err
+                    });
+                }
+                if(deletedQuery)
+                {
+                    return res.status(200).json({
+                        status: true,
+                        message: "Deleted Category & Query successfully",
+                        user: deletedQuery
+                      });
+                }
+                else
+                {
+                    console.log("Delete Query Failed");
+                    return res.status(500).json({
+                        status: false,
+                        message: "Delete Query Failed",
+                        error: 'Unknown'
+                    });
+                }
+            })
         }
         else
         {
@@ -440,6 +484,49 @@ router.post('/showHideEvent',Auth.authenticateAdmin,function(req,res){
                 status: false,
                 message: "Category does not exist!",
                 error: 'Category find error'
+            });
+        }
+    })
+})
+
+//Add Contact in Query
+router.post('/addContact',function(req,res){
+    Query.findOne({categoryName: req.body.categoryName},(err,item)=> {
+        if(err)
+        {
+            console.log("Add Contacts Failed",err);
+            return res.status(500).json({
+                status: false,
+                message: "Add Contacts Failed! Server Error..",
+                error: err
+            });
+        }
+        if(item)
+        {
+            item.contacts=[...item.contacts,req.body.contact];
+            item.save().then(data=> {
+                res.status(200).json({
+                    'status':true,
+                    'message':"Conatct added in the query",
+                    'data':data
+                })
+            })
+            .catch(err2 => {
+                console.log("Contact Addition Failed! II Try again..",err3);
+                res.status(500).json({
+                    'status':false,
+                    'message':"Contact addition error",
+                    'error':err2
+                })
+            })
+        }
+        else
+        {
+            console.log("Add Contacts Failed::FIND");
+            return res.status(500).json({
+                status: false,
+                message: "Query does not exist!",
+                error: 'Query find error'
             });
         }
     })

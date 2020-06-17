@@ -3,6 +3,7 @@ const GCS = require('../helpers/gcs');
 const Auth = require('../middlewares/auth');
 var Category = require('../model/categoryEventDetails');
 var Coupon = require('../model/couponDetails');
+var Query = require('../model/queryDetails');
 
 router.get('/getSettings', (req, res) => {
     let loadData = GCS.file('settings.txt').createReadStream();
@@ -89,6 +90,92 @@ router.get('/getCoupon',Auth.authenticateAll, function(req,res){
             message: "Fetched successfully",
             coupon: coupon
         });
+    })
+})
+
+//Get All Queries
+router.get('/getAllQueries',Auth.authenticateAll,function(req,res){
+    Query.find({},(err,queries)=> {
+        if(err)
+        {
+            return res.status(500).json({
+                status: false,
+                message: "Queries loading Failed! Server Error..",
+                error: err
+            });
+        }
+        res.status(200).json({
+            status: true,
+            data: queries,
+            message: "Queries fetched successfully"
+        })
+    })
+})
+
+//Get Query By Category Name
+router.get('/getQuery',Auth.authenticateAll,function(req,res){
+    Query.findOne({categoryName: req.body.categoryName},(err,query)=> {
+        if(err)
+        {
+            return res.status(500).json({
+                status: false,
+                message: "Query loading Failed! Server Error..",
+                error: err
+            });
+        }
+        res.status(200).json({
+            status: true,
+            data: query,
+            message: "Query fetched successfully"
+        })
+    })
+})
+
+//Add messages in Query
+router.post('/addMessage',Auth.authenticateAll,function(req,res){
+    Query.findOne({categoryName: req.body.categoryName},(err,item)=> {
+        if(err)
+        {
+            console.log("Add Message Failed",err);
+            return res.status(500).json({
+                status: false,
+                message: "Add Message Failed! Server Error..",
+                error: err
+            });
+        }
+        if(item)
+        {
+            var message = {
+                name: req.user.name,
+                email: req.user.email,
+                msg: req.body.message
+            }
+            item.messages=[...item.messages,message];
+            item.save().then(data=> {
+                res.status(200).json({
+                    'status':true,
+                    'message':"Message added in the query",
+                    'data':data
+                })
+            })
+            .catch(err2 => {
+                console.log("Message Addition Failed! II Try again..",err3);
+                res.status(500).json({
+                    'status':false,
+                    'message':"Message addition error",
+                    'error':err2
+                })
+            })
+        }
+        else
+        {
+            console.log("Add Message Failed::FIND");
+            return res.status(500).json({
+                status: false,
+                message: "Query does not exist!",
+                error: 'Query find error'
+            });
+        }
     })
 })
 
