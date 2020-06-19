@@ -145,8 +145,13 @@ router.post('/addMessage',Auth.authenticateAll,function(req,res){
         }
         if(item)
         {
+            var temp = req.user.name;
+            if(req.user.admin)
+            {
+                temp = 'ADMIN'
+            }
             var message = {
-                name: req.user.name,
+                name: temp,
                 email: req.user.email,
                 msg: req.body.message,
                 createdAt: Date.now()
