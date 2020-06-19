@@ -27,6 +27,10 @@ var querySchema = new Schema({
         },
         "msg":{
             type: String
+        },
+        "createdAt":{
+            type: String,
+            default: Date.now()
         }
     }]
 },{timestamps: true});

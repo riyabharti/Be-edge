@@ -117,7 +117,7 @@ router.get('/getAllCoupons',Auth.authenticateAdmin, function(req,res){
 })
 
 //Fetch All Users
-router.get('/fetchUsers',Auth.authenticateAdmin, function(req,res){
+router.get('/fetchUsers/:num',Auth.authenticateAdmin, function(req,res){
     User.find({},(err,users)=> {
         if (err)
         {
@@ -127,13 +127,35 @@ router.get('/fetchUsers',Auth.authenticateAdmin, function(req,res){
                 error: err
             });
         }
-        return res.status(200).json({
-        status: true,
-        message: "Fetched successfully",
-        users: users
-        });
+        if (req.params.num == 1)
+        {
+            users.sort((user1,user2)=> {
+                if (user1.verified === false && user1.eventRegDetails.receipt.length > 0)
+                {
+                    return -1;
+                }
+                else
+                {
+                    return 1;
+                }
+            })
+            return res.status(200).json({
+                status: true,
+                message: "Sorted successfully",
+                users: users
+            })
+        }
+        else
+        {
+            return res.status(200).json({
+                status: true,
+                message: "Fetched successfully",
+                users: users
+            });
+        }
     })
 })
+
 
 //Add Category
 router.post('/addCategory',Auth.authenticateAdmin,function(req,res){

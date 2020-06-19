@@ -148,7 +148,8 @@ router.post('/addMessage',Auth.authenticateAll,function(req,res){
             var message = {
                 name: req.user.name,
                 email: req.user.email,
-                msg: req.body.message
+                msg: req.body.message,
+                createdAt: Date.now()
             }
             item.messages=[...item.messages,message];
             item.save().then(data=> {
@@ -170,6 +171,61 @@ router.post('/addMessage',Auth.authenticateAll,function(req,res){
         else
         {
             console.log("Add Message Failed::FIND");
+            return res.status(500).json({
+                status: false,
+                message: "Query does not exist!",
+                error: 'Query find error'
+            });
+        }
+    })
+})
+
+//Delete Message in Query
+router.post('/deleteMessage',Auth.authenticateAll,function(req,res){
+    Query.findOne({categoryName: req.body.categoryName}, (err,item)=> {
+        if(err)
+        {
+            console.log("Delete Message Failed",err);
+            return res.status(500).json({
+                status: false,
+                message: "Deleting Message Failed! Server Error..",
+                error: err
+            });
+        }
+        if(item)
+        {
+            if(item.messages[req.body.index].msg == req.body.msg)
+            {
+                item.messages.splice(req.body.index,1);
+                item.save().then(item => {
+                    return res.status(200).json({
+                        status: true,
+                        message: "Delete Message successful",
+                        data: item
+                    });
+                })
+                .catch(err2 => {
+                    console.log("Delete Message Failed",err2);
+                    return res.status(500).json({
+                        status: false,
+                        message: "Delete Message Failed",
+                        error: err2
+                    });
+                })
+            }
+            else
+            {
+                console.log("Delete Message Failed::INVALID");
+                return res.status(500).json({
+                    status: false,
+                    message: "Delete Message Failed",
+                    error: 'Wrong Query details'
+                });
+            }
+        }
+        else
+        {
+            console.log("Delete Message Failed::FIND");
             return res.status(500).json({
                 status: false,
                 message: "Query does not exist!",
