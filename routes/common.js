@@ -95,7 +95,7 @@ router.get('/getCoupon',Auth.authenticateAll, function(req,res){
 
 //Get All Queries
 router.get('/getAllQueries',Auth.authenticateAll,function(req,res){
-    Query.find({},(err,queries)=> {
+    Query.find({},{messages: {$slice: -parseInt(process.env.MSG_COUNT)}},(err,queries)=> {
         if(err)
         {
             return res.status(500).json({
@@ -112,9 +112,11 @@ router.get('/getAllQueries',Auth.authenticateAll,function(req,res){
     })
 })
 
-//Get Query By Category Name
-router.get('/getQuery',Auth.authenticateAll,function(req,res){
-    Query.findOne({categoryName: req.body.categoryName},(err,query)=> {
+//Get Query By Category Id
+router.get('/getQuery/:id/:num',function(req,res){
+    const num=(req.params.num- -1)*process.env.MSG_COUNT;  
+    console.log(num);
+    Query.findById(req.params.id,{messages: {$slice: [-num,parseInt(process.env.MSG_COUNT)]}},(err,query)=> {
         if(err)
         {
             return res.status(500).json({
@@ -220,6 +222,7 @@ router.post('/deleteMessage',Auth.authenticateAll,function(req,res){
             }
             else
             {
+                console.log(item.messages[req.body.index].msg,req.body.msg);
                 console.log("Delete Message Failed::INVALID");
                 return res.status(500).json({
                     status: false,
