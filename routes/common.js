@@ -96,39 +96,75 @@ router.get("/getCoupon", Auth.authenticateAll, function (req, res) {
 });
 
 //Get All Queries
-router.get("/getAllQueries", Auth.authenticateAll, function (req, res) {
-	Query.find({}, (err, queries) => {
-		if (err) {
-			return res.status(500).json({
-				status: false,
-				message: "Queries loading Failed! Server Error..",
-				error: err
-			});
-		}
-		res.status(200).json({
-			status: true,
-			data: queries,
-			message: "Queries fetched successfully"
-		});
-	});
-});
+router.get('/getAllQueries',Auth.authenticateAll, (req,res) => {
+    Query.aggregate([{$project: { count: { $size: "$messages" }}}], (err1, data) => {
+        if(err1)
+            {
+                return res.status(500).json({
+                    status: false,
+                    message: "Query loading Failed! Server Error..",
+                    error: err1
+                });
+            }
+        let lasts = [];
+        data.forEach(d => lasts.push(d.count <= LOT_SIZE))
+        Query.find({},{ messages: {$slice: -LOT_SIZE}}, (err,query)=> {
+            if(err)
+            {
+                return res.status(500).json({
+                    status: false,
+                    message: "Query loading Failed! Server Error..",
+                    error: err
+                });
+            }
+            let queryData = [];
+            query.forEach((q,i) => {
+                let t = q.toJSON();
+                t.last = lasts[i]
+                queryData.push(t);
+            })
+            res.status(200).json({
+                status: true,
+                data: queryData,
+                lotSize: LOT_SIZE,
+                message: "Query fetched successfully"
+            })
+        })
+    })
+})
 
-//Get Query By Category Name
-router.get("/getQuery", Auth.authenticateAll, function (req, res) {
-	Query.findOne({ categoryName: req.body.categoryName }, (err, query) => {
-		if (err) {
-			return res.status(500).json({
-				status: false,
-				message: "Query loading Failed! Server Error..",
-				error: err
-			});
-		}
-		res.status(200).json({
-			status: true,
-			data: query,
-			message: "Query fetched successfully"
-		});
-	});
+//Get Query By Category Id and Lot number
+router.get('/getQuery/:id/:num',Auth.authenticateAll,function(req,res){
+    const num=parseInt(req.params.num- -1)*LOT_SIZE; 
+    Query.aggregate([{$project: { count: { $size: "$messages" }}}], (err1, data) => {
+        if(err1)
+            {
+                return res.status(500).json({
+                    status: false,
+                    message: "Query loading Failed! Server Error..",
+                    error: err1
+                });
+            }
+        let msgCount = data.find(d => d._id == req.params.id).count;
+        let remains = msgCount-(LOT_SIZE*parseInt(req.params.num));
+        Query.findById(req.params.id, {  messages: { $slice: [-num, remains < LOT_SIZE ? remains : LOT_SIZE] } }, (err,query)=> {
+            if(err)
+            {
+                return res.status(500).json({
+                    status: false,
+                    message: "Query loading Failed! Server Error..",
+                    error: err
+                });
+            }
+            let que = query.toJSON();
+            que.last = remains < LOT_SIZE;
+            res.status(200).json({
+                status: true,
+                data: que,
+                message: "Query fetched successfully"
+            })
+        })
+    })
 });
 
 //Add messages in Query
