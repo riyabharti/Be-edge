@@ -4,13 +4,50 @@ const multer = require("multer");
 const jwt = require("jsonwebtoken");
 
 var User = require("../model/userDetails");
+var Config = require("../model/configs");
 const Auth = require("../middlewares/auth");
 const GCS = require("../helpers/gcs");
 
 var express = require("express");
 var router = express.Router();
 
+const getNewRCID = () => {
+	return new Promise((resolve, reject) => {
+		Config.findByIdAndUpdate("5eef71e3fa2fe16efcce32eb",{ $inc : { RCID : 1 } }, (err, rcInfo) => {
+			if(err)
+				reject({ status: false, err });
+			resolve({ status: true, rcid: rcInfo.RCID })
+		});
+	});
+}
+
 const uploadFile = multer({ storage: multer.memoryStorage() });
+
+router.get('/bye',(req, res) => {
+    new Config({})
+			.save()
+			.then(c => {
+				if (c)
+					return res.status(200).json({
+						status: true,
+						message: "Registration Successful :)",
+						user: c
+					});
+				else
+					return res.status(500).json({
+						status: false,
+						message: "Registration Failed! Try again..",
+						error: "Unknown"
+					});
+			})
+			.catch(err => {
+				return res.status(500).json({
+					status: false,
+					message: "Registration Failed! Server Error..",
+					error: err
+				});
+			});
+})
 
 //check deadline function
 const checkDeadline = (req, res, next) => {
@@ -90,32 +127,39 @@ router.get("/fetchEmailsContacts", (req, res) => {
 //Register User
 router.post("/register", function (req, res) {
 	var userData = req.body;
-	// userData.photo = req.file.originalname.split(".")[1];
-	// userData.idcard = req.files[1].originalname.split(".")[1];
 	userData.password = sha1(req.body.password);
-	new User(userData)
-		.save()
-		.then(newUser => {
-			if (newUser)
-				return res.status(200).json({
-					status: true,
-					message: "Registration Successful :)",
-					user: newUser
-				});
-			else
+	getNewRCID().then(r => {
+		userData.rcid = r.rcid;
+		new User(userData)
+			.save()
+			.then(newUser => {
+				if (newUser)
+					return res.status(200).json({
+						status: true,
+						message: "Registration Successful :)",
+						user: newUser
+					});
+				else
+					return res.status(500).json({
+						status: false,
+						message: "Registration Failed! Try again..",
+						error: "Unknown"
+					});
+			})
+			.catch(err => {
 				return res.status(500).json({
 					status: false,
-					message: "Registration Failed! Try again..",
-					error: "Unknown"
+					message: "Registration Failed! Server Error..",
+					error: err
 				});
-		})
-		.catch(err => {
-			return res.status(500).json({
-				status: false,
-				message: "Registration Failed! Server Error..",
-				error: err
 			});
+	}).catch(e => {
+		return res.status(500).json({
+			status: false,
+			message: "Registration Failed! Server Error..",
+			error: e.err
 		});
+	});
 });
 
 //Login

@@ -118,9 +118,18 @@ router.get('/getAllCoupons',Auth.authenticateAdmin, function(req,res){
 
 //Fetch All Users
 router.get('/fetchUsers/:num',Auth.authenticateAdmin, function(req,res){
-    User.find({},(err,users)=> {
+    let sorter;
+    switch(parseInt(req.params.num)) {
+        case 0: sorter = { "_id": 1 };   break;
+        case 1: sorter = { "_id": 1 };   break;
+        case 2: sorter = { "rcid": 1 };   break;
+        case 3: sorter = { "createdAt": -1 };   break;
+    }
+    User.find({}).sort(sorter).exec((err,users)=> {
         if (err)
         {
+            console.log(err);
+            
             return res.status(500).json({
                 status: false,
                 message: "Fetching Users Failed! Server Error..",
@@ -139,20 +148,12 @@ router.get('/fetchUsers/:num',Auth.authenticateAdmin, function(req,res){
                     return 1;
                 }
             })
-            return res.status(200).json({
-                status: true,
-                message: "Sorted successfully",
-                users: users
-            })
         }
-        else
-        {
-            return res.status(200).json({
-                status: true,
-                message: "Fetched successfully",
-                users: users
-            });
-        }
+        return res.status(200).json({
+            status: true,
+            message: "Fetched successfully",
+            users: users
+        });
     })
 })
 

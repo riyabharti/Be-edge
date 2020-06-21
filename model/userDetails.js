@@ -39,6 +39,11 @@ var userSchema=new Schema({
         type: Boolean,
         default: false
     },
+    "rcid": {
+        type: Number,
+        required: true,
+        unique: true
+    },
     "events": {
         type: Object,
         default: {}

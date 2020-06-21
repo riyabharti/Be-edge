@@ -4,6 +4,9 @@ const Auth = require("../middlewares/auth");
 var Category = require("../model/categoryEventDetails");
 var Coupon = require("../model/couponDetails");
 var Query = require("../model/queryDetails");
+var User = require("../model/userDetails");
+
+const LOT_SIZE = parseInt(process.env.MSG_COUNT);
 
 router.get("/getSettings", (req, res) => {
 	let loadData = GCS.file("settings.txt").createReadStream();
@@ -157,7 +160,7 @@ router.get('/getQuery/:id/:num',Auth.authenticateAll,function(req,res){
                 });
             }
             let que = query.toJSON();
-            que.last = remains < LOT_SIZE;
+            que.last = remains <= LOT_SIZE;
             res.status(200).json({
                 status: true,
                 data: que,
@@ -220,7 +223,7 @@ router.post("/addMessage", Auth.authenticateAll, function (req, res) {
 
 //Delete Message in Query
 router.post("/deleteMessage", Auth.authenticateAll, function (req, res) {
-	Query.findOne({ categoryName: req.body.categoryName }, (err, item) => {
+    Query.updateOne({ categoryName: req.body.categoryName }, { $pull: { "messages" : { "_id": req.body.msgId } } }, (err, item) => {
 		if (err) {
 			console.log("Delete Message Failed", err);
 			return res.status(500).json({
@@ -228,44 +231,13 @@ router.post("/deleteMessage", Auth.authenticateAll, function (req, res) {
 				message: "Deleting Message Failed! Server Error..",
 				error: err
 			});
-		}
-		if (item) {
-			if (item.messages[req.body.index].msg == req.body.msg) {
-				item.messages.splice(req.body.index, 1);
-				item
-					.save()
-					.then(item => {
-						return res.status(200).json({
-							status: true,
-							message: "Delete Message successful",
-							data: item
-						});
-					})
-					.catch(err2 => {
-						console.log("Delete Message Failed", err2);
-						return res.status(500).json({
-							status: false,
-							message: "Delete Message Failed",
-							error: err2
-						});
-					});
-			} else {
-				console.log("Delete Message Failed::INVALID");
-				return res.status(500).json({
-					status: false,
-					message: "Delete Message Failed",
-					error: "Wrong Query details"
-				});
-			}
-		} else {
-			console.log("Delete Message Failed::FIND");
-			return res.status(500).json({
-				status: false,
-				message: "Query does not exist!",
-				error: "Query find error"
-			});
-		}
-	});
+        }
+        return res.status(200).json({
+            status: true,
+            message: "Delete Message successful",
+            data: item
+        });
+    })
 });
 
 router.get("/list", (req, res) => {
@@ -286,6 +258,25 @@ router.get("/list", (req, res) => {
 			error: err
 		});
 	});
+});
+
+//Delete Message in Query
+router.post("/add_rcid", function (req, res) {
+    User.updateOne({ email: req.body.email }, { $set: { "rcid": req.body.rcid } }, (err, item) => {
+		if (err) {
+			console.log("Delete Message Failed", err);
+			return res.status(500).json({
+				status: false,
+				message: "Update Failed! Server Error..",
+				error: err
+			});
+        }
+        return res.status(200).json({
+            status: true,
+            message: "Update Success",
+            data: item
+        });
+    })
 });
 
 module.exports = router;
