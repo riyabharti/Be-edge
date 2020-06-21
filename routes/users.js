@@ -13,7 +13,7 @@ var router = express.Router();
 
 const getNewRCID = () => {
 	return new Promise((resolve, reject) => {
-		Config.findByIdAndUpdate("5eef71e3fa2fe16efcce32eb",{ $inc : { RCID : 1 } }, (err, rcInfo) => {
+		Config.findByIdAndUpdate("5eefa2bf0043eb02d8e019c8",{ $inc : { RCID : 1 } }, (err, rcInfo) => {
 			if(err)
 				reject({ status: false, err });
 			resolve({ status: true, rcid: rcInfo.RCID })
