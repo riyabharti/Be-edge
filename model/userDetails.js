@@ -20,7 +20,7 @@ var userSchema=new Schema({
     },
     "instituteName": {
         type: String,
-        required: true
+        default: ""
     },
     "contact": {
         type: String,
