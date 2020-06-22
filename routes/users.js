@@ -233,10 +233,10 @@ router.post("/eventRegister", Auth.authenticateAll, uploadFile.array("files[]", 
 		}
 		if (item) {
 			var registerEvents = JSON.parse(req.body.registerEvents);
-			console.log(item);
+			// console.log(item);
 			let firstRegistration = Object.keys(item.events).length > 0 ? false : true;
-			console.log("Is this first Registration" + firstRegistration);
-			console.log(registerEvents);
+			// console.log("Is this first Registration" + firstRegistration);
+			// console.log(registerEvents);
 			if (!firstRegistration) {
 				Object.keys(registerEvents).map(cat => {
 					console.log(registerEvents[cat]);
@@ -253,7 +253,7 @@ router.post("/eventRegister", Auth.authenticateAll, uploadFile.array("files[]", 
 			}
 			var len = item.eventRegDetails.total.length - -1;
 			item.eventRegDetails.total.push(req.body.total);
-			console.log(item.events);
+			// console.log(item.events);
 			item.verified = false;
 			item.eventRegDetails.upiId.push(req.body.upiId);
 			item.couponApplied = item.couponApplied - -req.body.couponApplied;
@@ -261,7 +261,7 @@ router.post("/eventRegister", Auth.authenticateAll, uploadFile.array("files[]", 
 			if (req.files.length > 1) {
 				item.couponPhoto = req.files[1].originalname.split(".")[1];
 			}
-			console.log(item);
+			// console.log(item);
 			User.findByIdAndUpdate(item._id, { $set: { events: item.events } }, err => {
 				if (err) {
 					console.log(err);
