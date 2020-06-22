@@ -13,10 +13,26 @@ var router = express.Router();
 
 const getNewRCID = () => {
 	return new Promise((resolve, reject) => {
-		Config.findByIdAndUpdate("5eefa2bf0043eb02d8e019c8",{ $inc : { RCID : 1 } }, (err, rcInfo) => {
+		Config.findOne({}, (err, rcInfo) => {
 			if(err)
 				reject({ status: false, err });
 			resolve({ status: true, rcid: rcInfo.RCID })
+		});
+	});
+}
+
+const setNewRCID = (res, newUser) => {
+	Config.updateOne({},{ $inc : { RCID : 1 } }, (err, rcInfo) => {
+		if(err || !rcInfo)
+			return res.status(500).json({
+				status: false,
+				message: "RC ID update error",
+				error: err || "Unknown"
+			});
+		return res.status(200).json({
+			status: true,
+			message: "Registration Successful :)",
+			user: newUser
 		});
 	});
 }
@@ -133,12 +149,9 @@ router.post("/register", function (req, res) {
 		new User(userData)
 			.save()
 			.then(newUser => {
-				if (newUser)
-					return res.status(200).json({
-						status: true,
-						message: "Registration Successful :)",
-						user: newUser
-					});
+				if (newUser) {
+					setNewRCID(res, newUser);
+				}
 				else
 					return res.status(500).json({
 						status: false,
