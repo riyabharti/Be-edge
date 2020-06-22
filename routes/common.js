@@ -171,7 +171,7 @@ router.get('/getQuery/:id/:num',Auth.authenticateAll,function(req,res){
 });
 
 //Add messages in Query
-router.post("/addMessage", Auth.authenticateAll, function (req, res) {
+router.post("/addMessage2", Auth.authenticateAll, function (req, res) {
 	Query.findOne({ categoryName: req.body.categoryName }, (err, item) => {
 		if (err) {
 			console.log("Add Message Failed", err);
@@ -220,6 +220,35 @@ router.post("/addMessage", Auth.authenticateAll, function (req, res) {
 		}
 	});
 });
+
+//Add message with push in Query
+router.post("/addMessage",Auth.authenticateAll,function (req,res) {
+	var temp = req.user.name;
+	if (req.user.admin) {
+		temp = "ADMIN";
+	}
+	var message = {
+		name: temp,
+		email: req.user.email,
+		msg: req.body.message,
+		createdAt: Date.now()
+	};
+	Query.updateOne({categoryName: req.body.categoryName}, {$push: {"messages": message}}, (err,item)=> {
+		if (err) {
+			console.log("Add Message Failed", err);
+			return res.status(500).json({
+				status: false,
+				message: "Add Message Failed! Server Error..",
+				error: err
+			});
+		}
+		return res.status(200).json({
+            status: true,
+            message: "Add Message successful",
+            data: item
+        });
+	})
+})
 
 //Delete Message in Query
 router.post("/deleteMessage", Auth.authenticateAll, function (req, res) {
