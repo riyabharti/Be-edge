@@ -289,14 +289,14 @@ router.get("/list", (req, res) => {
 	});
 });
 
-//Delete Message in Query
-router.post("/add_rcid", function (req, res) {
-    User.updateOne({ email: req.body.email }, { $set: { "rcid": req.body.rcid } }, (err, item) => {
+//Add OTP in User
+router.get("/add_otp", function (req, res) {
+    User.updateMany({}, { $set: { "otp": "" } }, (err, item) => {
 		if (err) {
-			console.log("Delete Message Failed", err);
+			console.log("OTP addition Failed", err);
 			return res.status(500).json({
 				status: false,
-				message: "Update Failed! Server Error..",
+				message: "OTP Addition Failed! Server Error..",
 				error: err
 			});
         }

@@ -38,12 +38,6 @@ const setNewRCID = (res, newUser) => {
 	});
 }
 
-function getRandomInt(min, max) {
-	min = Math.ceil(min);
-	max = Math.floor(max);
-	return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
 var transporter = nodemailer.createTransport({
 	service: 'gmail',
 	auth: {
@@ -250,38 +244,41 @@ router.post("/forgotPassword",function(req,res){
 			});
 		} else {
 			//Secret Key generate for 6 digits
-			var secret = [];
-			for(i=0;i<6;i++)
-			{
-				var c = Math.floor(Math.random()*10);
-				switch(c%3)
-				{
-					case 0:	secret.push(String.fromCharCode(getRandomInt(65,90)));	break;
-					case 1:	secret.push(String.fromCharCode(getRandomInt(97,122)));	break;
-					case 2:	secret.push(getRandomInt(0,9));	break;
-				}
-			}
-			secret=secret.join('');
+			let secret = '';
+			let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+			let charactersLength = characters.length;
+			for ( let i = 0; i < 6; i++ )
+				secret += characters.charAt(Math.round(Math.random() * charactersLength));
+			console.log(secret);
 			const mailOptions = {
 				from: 'Edge 2k20 <'+process.env.SENDER_EMAIL+'>',
 				to: req.body.email,
 				subject: "OTP for Change password Request",
 				html: "<p>Your OTP for change password is <b>"+secret+"</b></p>"
 			};
-			//Send OTP to registered mail
-			transporter.sendMail(mailOptions).then(info => {
-				res.status(200).json({
-					status:true,
-					secret: secret,
-					data: info,
-					message: "OTP Sent"
+			item.otp=secret;
+			item.save().then(data=> {
+				//Send OTP to registered mail
+				transporter.sendMail(mailOptions).then(info => {
+					res.status(200).json({
+						status:true,
+						secret: secret,
+						data: info,
+						message: "OTP Sent"
+					})
+				}).catch(err => {
+					res.status(500).json({
+						status:false,
+						secret: secret,
+						error: err,
+						message: "Error in sending mail"
+					})
 				})
 			}).catch(err => {
 				res.status(500).json({
 					status:false,
-					secret: secret,
 					error: err,
-					message: "Error in sending mail"
+					message: "Error in generatin otp"
 				})
 			})
 		}
@@ -291,7 +288,14 @@ router.post("/forgotPassword",function(req,res){
 
 //Reset Password
 router.post("/resetPassword",(req,res)=>{
-	User.findOneAndUpdate({email: req.body.email},{password: sha1(req.body.password)},(err,item) =>{
+	if(req.body.otp == "")
+	{
+		return res.status(401).json({
+			status: false,
+			message:"Unauthorized!! OTP cannot be blank"
+		})
+	}
+	User.findOneAndUpdate({email: req.body.email, otp: req.body.otp},{password: sha1(req.body.password), otp: ""},(err,item) =>{
 		if(err)
 		{
 			console.log(err);
@@ -301,11 +305,21 @@ router.post("/resetPassword",(req,res)=>{
 				error: err
 			});
 		}
-		res.status(200).json({
-			status: true,
-			message: "Password reset completed! Login with new password",
-			data: item
-		})
+		if(item == null)
+		{
+			return res.status(500).json({
+				status: true,
+				message: "Incorrect OTP",
+				data: item,
+			})
+		}
+		else{
+			return res.status(200).json({
+				status: true,
+				message: "Password reset completed! Login with new password",
+				data: item,
+			})
+		}
 	})
 })
 

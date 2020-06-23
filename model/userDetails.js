@@ -69,6 +69,10 @@ var userSchema=new Schema({
     "couponPhoto": {
         type: String,
         default: ""
+    },
+    "otp": {
+        type: String,
+        default: ""
     }
 },{timestamps: true});
 
