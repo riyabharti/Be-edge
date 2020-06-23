@@ -2,6 +2,7 @@ const sha1 = require("sha1");
 const path = require("path");
 const multer = require("multer");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 
 var User = require("../model/userDetails");
 var Config = require("../model/configs");
@@ -36,6 +37,20 @@ const setNewRCID = (res, newUser) => {
 		});
 	});
 }
+
+function getRandomInt(min, max) {
+	min = Math.ceil(min);
+	max = Math.floor(max);
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+var transporter = nodemailer.createTransport({
+	service: 'gmail',
+	auth: {
+		user: process.env.SENDER_EMAIL,
+		pass: process.env.SENDER_PASS
+	}
+});
 
 const uploadFile = multer({ storage: multer.memoryStorage() });
 
@@ -217,6 +232,83 @@ router.post("/login", function (req, res) {
 	});
 });
 
+//Forgot Password
+router.post("/forgotPassword",function(req,res){
+	User.findOne({ email: req.body.email }, (err, item) => {
+		if (err) {
+			console.log(err);
+			return res.status(500).json({
+				status: false,
+				message: "Forgot Password Failed! Server Error..",
+				error: err
+			});
+		}
+		if (item == null) {
+			res.status(401).json({
+				status: false,
+				message: "Email does not exist"
+			});
+		} else {
+			//Secret Key generate for 6 digits
+			var secret = [];
+			for(i=0;i<6;i++)
+			{
+				var c = Math.floor(Math.random()*10);
+				switch(c%3)
+				{
+					case 0:	secret.push(String.fromCharCode(getRandomInt(65,90)));	break;
+					case 1:	secret.push(String.fromCharCode(getRandomInt(97,122)));	break;
+					case 2:	secret.push(getRandomInt(0,9));	break;
+				}
+			}
+			secret=secret.join('');
+			const mailOptions = {
+				from: 'Edge 2k20 <'+process.env.SENDER_EMAIL+'>',
+				to: req.body.email,
+				subject: "OTP for Change password Request",
+				html: "<p>Your OTP for change password is <b>"+secret+"</b></p>"
+			};
+			//Send OTP to registered mail
+			transporter.sendMail(mailOptions).then(info => {
+				res.status(200).json({
+					status:true,
+					secret: secret,
+					data: info,
+					message: "OTP Sent"
+				})
+			}).catch(err => {
+				res.status(500).json({
+					status:false,
+					secret: secret,
+					error: err,
+					message: "Error in sending mail"
+				})
+			})
+		}
+	});
+	
+})
+
+//Reset Password
+router.post("/resetPassword",(req,res)=>{
+	User.findOneAndUpdate({email: req.body.email},{password: sha1(req.body.password)},(err,item) =>{
+		if(err)
+		{
+			console.log(err);
+			return res.status(500).json({
+				status: false,
+				message: "Reset Password Failed! Server Error..",
+				error: err
+			});
+		}
+		res.status(200).json({
+			status: true,
+			message: "Password reset completed! Login with new password",
+			data: item
+		})
+	})
+})
+
 //Event Registration
 router.post("/eventRegister", Auth.authenticateAll, uploadFile.array("files[]", 2), function (
 	req,
@@ -360,7 +452,7 @@ router.post("/changePassword", Auth.authenticateAll, function(req,res) {
 			console.log(err);
 			return res.status(500).json({
 				status: false,
-				message: "Login Failed! Server Error..",
+				message: "Change Password Failed! Server Error..",
 				error: err
 			});
 		}
