@@ -84,7 +84,7 @@ router.get("/getCategory/:id", Auth.authenticateAll, function (req, res) {
 router.get("/getCoupon", Auth.authenticateAll, function (req, res) {
 	Coupon.findOne({ email: { $regex: new RegExp("^" + req.user.email, "i") } }, (err, coupon) => {
 		if (err) {
-			return res.status({
+			return res.status(500).json({
 				status: false,
 				message: "Fetching Coupon Failed! Server Error..",
 				error: err
@@ -97,6 +97,26 @@ router.get("/getCoupon", Auth.authenticateAll, function (req, res) {
 		});
 	});
 });
+
+//Get Coupon using coupon Code
+router.get("/getCoupon/:cc",Auth.authenticateAdmin,function(req,res){
+	Coupon.findOne({couponCode: req.params.cc}, (err,item) => {
+		if(err)
+		{
+			return res.status(500).json({
+				status: false,
+				message: "Fetching Coupon Failed! Server Error..",
+				error: err
+			});
+		}
+		console.log(item);
+		return res.status(200).json({
+			status: true,
+			message: "Coupon fetched",
+			data: item
+		})
+	})
+})
 
 //Get All Queries
 router.get('/getAllQueries',Auth.authenticateAll, (req,res) => {

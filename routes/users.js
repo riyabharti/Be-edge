@@ -238,7 +238,7 @@ router.get("/forgotPassword/:email",function(req,res){
 			});
 		}
 		if (item == null) {
-			res.status(401).json({
+			res.status(500).json({
 				status: false,
 				message: "Email is not registered!"
 			});
