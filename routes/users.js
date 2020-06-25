@@ -227,8 +227,8 @@ router.post("/login", function (req, res) {
 });
 
 //Forgot Password
-router.post("/forgotPassword",function(req,res){
-	User.findOne({ email: req.body.email }, (err, item) => {
+router.get("/forgotPassword/:email",function(req,res){
+	User.findOne({ email: req.params.email }, (err, item) => {
 		if (err) {
 			console.log(err);
 			return res.status(500).json({
@@ -240,7 +240,7 @@ router.post("/forgotPassword",function(req,res){
 		if (item == null) {
 			res.status(401).json({
 				status: false,
-				message: "Email does not exist"
+				message: "Email is not registered!"
 			});
 		} else {
 			//Secret Key generate for 6 digits
@@ -252,7 +252,7 @@ router.post("/forgotPassword",function(req,res){
 			console.log(secret);
 			const mailOptions = {
 				from: 'Edge 2k20 <'+process.env.SENDER_EMAIL+'>',
-				to: req.body.email,
+				to: req.params.email,
 				subject: "OTP for Change password Request",
 				html: "<p>Your OTP for change password is <b>"+secret+"</b></p>"
 			};
@@ -264,7 +264,7 @@ router.post("/forgotPassword",function(req,res){
 						status:true,
 						secret: secret,
 						data: info,
-						message: "OTP Sent"
+						message: "OTP Sent to your registered email"
 					})
 				}).catch(err => {
 					res.status(500).json({
@@ -278,7 +278,7 @@ router.post("/forgotPassword",function(req,res){
 				res.status(500).json({
 					status:false,
 					error: err,
-					message: "Error in generatin otp"
+					message: "Error in generating otp"
 				})
 			})
 		}
