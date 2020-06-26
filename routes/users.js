@@ -246,15 +246,14 @@ router.get("/forgotPassword/:email",function(req,res){
 			//Secret Key generate for 6 digits
 			let secret = '';
 			let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-			let charactersLength = characters.length;
 			for ( let i = 0; i < 6; i++ )
-				secret += characters.charAt(Math.round(Math.random() * charactersLength));
+				secret += characters.charAt(Math.floor(Math.random() * (characters.length + 1)) + 0);
 			console.log(secret);
 			const mailOptions = {
 				from: 'Edge 2k20 <'+process.env.SENDER_EMAIL+'>',
 				to: req.params.email,
-				subject: "OTP for Change password Request",
-				html: "<p>Your OTP for change password is <b>"+secret+"</b></p>"
+				subject: "OTP for Change Password Request",
+				html: "<p>Your OTP for Change Password Request is <b>"+secret+"</b>. <i>Do not share your OTP with anyone.<i></p>"
 			};
 			item.otp=secret;
 			item.save().then(data=> {
