@@ -2,7 +2,7 @@ const sha1 = require("sha1");
 const path = require("path");
 const multer = require("multer");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
+// const nodemailer = require("nodemailer");
 
 var User = require("../model/userDetails");
 var Config = require("../model/configs");
@@ -38,13 +38,13 @@ const setNewRCID = (res, newUser) => {
 	});
 }
 
-var transporter = nodemailer.createTransport({
-	service: 'gmail',
-	auth: {
-		user: process.env.SENDER_EMAIL,
-		pass: process.env.SENDER_PASS
-	}
-});
+// var transporter = nodemailer.createTransport({
+// 	service: 'gmail',
+// 	auth: {
+// 		user: process.env.SENDER_EMAIL,
+// 		pass: process.env.SENDER_PASS
+// 	}
+// });
 
 const uploadFile = multer({ storage: multer.memoryStorage() });
 
@@ -227,100 +227,100 @@ router.post("/login", function (req, res) {
 });
 
 //Forgot Password
-router.get("/forgotPassword/:email",function(req,res){
-	User.findOne({ email: req.params.email }, (err, item) => {
-		if (err) {
-			console.log(err);
-			return res.status(500).json({
-				status: false,
-				message: "Forgot Password Failed! Server Error..",
-				error: err
-			});
-		}
-		if (item == null) {
-			res.status(500).json({
-				status: false,
-				message: "Email is not registered!"
-			});
-		} else {
-			//Secret Key generate for 6 digits
-			let secret = '';
-			let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-			for ( let i = 0; i < 6; i++ )
-				secret += characters.charAt(Math.floor(Math.random() * (characters.length + 1)) + 0);
-			console.log(secret);
-			const mailOptions = {
-				from: 'Edge 2k20 <'+process.env.SENDER_EMAIL+'>',
-				to: req.params.email,
-				subject: "OTP for Change Password Request",
-				html: "<p>Your OTP for Change Password Request is <b>"+secret+"</b>. <i>Do not share your OTP with anyone.<i></p>"
-			};
-			item.otp=secret;
-			item.save().then(data=> {
-				//Send OTP to registered mail
-				transporter.sendMail(mailOptions).then(info => {
-					res.status(200).json({
-						status:true,
-						secret: secret,
-						data: info,
-						message: "OTP Sent to your registered email"
-					})
-				}).catch(err => {
-					res.status(500).json({
-						status:false,
-						secret: secret,
-						error: err,
-						message: "Error in sending mail"
-					})
-				})
-			}).catch(err => {
-				res.status(500).json({
-					status:false,
-					error: err,
-					message: "Error in generating otp"
-				})
-			})
-		}
-	});
+// router.get("/forgotPassword/:email",function(req,res){
+// 	User.findOne({ email: req.params.email }, (err, item) => {
+// 		if (err) {
+// 			console.log(err);
+// 			return res.status(500).json({
+// 				status: false,
+// 				message: "Forgot Password Failed! Server Error..",
+// 				error: err
+// 			});
+// 		}
+// 		if (item == null) {
+// 			res.status(500).json({
+// 				status: false,
+// 				message: "Email is not registered!"
+// 			});
+// 		} else {
+// 			//Secret Key generate for 6 digits
+// 			let secret = '';
+// 			let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+// 			for ( let i = 0; i < 6; i++ )
+// 				secret += characters.charAt(Math.floor(Math.random() * (characters.length + 1)) + 0);
+// 			console.log(secret);
+// 			const mailOptions = {
+// 				from: 'Edge 2k20 <'+process.env.SENDER_EMAIL+'>',
+// 				to: req.params.email,
+// 				subject: "OTP for Change Password Request",
+// 				html: "<p>Your OTP for Change Password Request is <b>"+secret+"</b>. <i>Do not share your OTP with anyone.<i></p>"
+// 			};
+// 			item.otp=secret;
+// 			item.save().then(data=> {
+// 				//Send OTP to registered mail
+// 				transporter.sendMail(mailOptions).then(info => {
+// 					res.status(200).json({
+// 						status:true,
+// 						secret: secret,
+// 						data: info,
+// 						message: "OTP Sent to your registered email"
+// 					})
+// 				}).catch(err => {
+// 					res.status(500).json({
+// 						status:false,
+// 						secret: secret,
+// 						error: err,
+// 						message: "Error in sending mail"
+// 					})
+// 				})
+// 			}).catch(err => {
+// 				res.status(500).json({
+// 					status:false,
+// 					error: err,
+// 					message: "Error in generating otp"
+// 				})
+// 			})
+// 		}
+// 	});
 	
-})
+// })
 
 //Reset Password
-router.post("/resetPassword",(req,res)=>{
-	if(req.body.otp == "")
-	{
-		return res.status(401).json({
-			status: false,
-			message:"Unauthorized!! OTP cannot be blank"
-		})
-	}
-	User.findOneAndUpdate({email: req.body.email, otp: req.body.otp},{password: sha1(req.body.password), otp: ""},(err,item) =>{
-		if(err)
-		{
-			console.log(err);
-			return res.status(500).json({
-				status: false,
-				message: "Reset Password Failed! Server Error..",
-				error: err
-			});
-		}
-		if(item == null)
-		{
-			return res.status(500).json({
-				status: true,
-				message: "Incorrect OTP",
-				data: item,
-			})
-		}
-		else{
-			return res.status(200).json({
-				status: true,
-				message: "Password reset completed! Login with new password",
-				data: item,
-			})
-		}
-	})
-})
+// router.post("/resetPassword",(req,res)=>{
+// 	if(req.body.otp == "")
+// 	{
+// 		return res.status(401).json({
+// 			status: false,
+// 			message:"Unauthorized!! OTP cannot be blank"
+// 		})
+// 	}
+// 	User.findOneAndUpdate({email: req.body.email, otp: req.body.otp},{password: sha1(req.body.password), otp: ""},(err,item) =>{
+// 		if(err)
+// 		{
+// 			console.log(err);
+// 			return res.status(500).json({
+// 				status: false,
+// 				message: "Reset Password Failed! Server Error..",
+// 				error: err
+// 			});
+// 		}
+// 		if(item == null)
+// 		{
+// 			return res.status(500).json({
+// 				status: true,
+// 				message: "Incorrect OTP",
+// 				data: item,
+// 			})
+// 		}
+// 		else{
+// 			return res.status(200).json({
+// 				status: true,
+// 				message: "Password reset completed! Login with new password",
+// 				data: item,
+// 			})
+// 		}
+// 	})
+// })
 
 //Event Registration
 router.post("/eventRegister", Auth.authenticateAll, uploadFile.array("files[]", 2), function (
