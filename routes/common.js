@@ -328,4 +328,166 @@ router.get("/add_otp", function (req, res) {
     })
 });
 
+//Get registered events
+router.get("/getRegEvents/:email",function(req,res){
+	User.findOne({email: req.params.email}, (err,item) => {
+		if(err)
+		{
+			console.log("Get Registered Events Failed", err);
+			return res.status(500).json({
+				status: false,
+				message: "Get Registered Events Failed! Server Error..",
+				error: err
+			});
+		}
+		if (item == null)
+		{
+			return res.status(500).json({
+				status : false,
+				message: 'User is not registered'
+			})
+		}
+		return res.status(200).json({
+			status: true,
+			message: 'Events Fetched successfully',
+			data: item.events
+		})
+	})
+})
+
+//Get emails for registered event Id
+router.get('/getRegEmails/:eventId',function(req,res){
+	var count =0;
+	User.find({},{email: 1, events: 1}, (err,items) => {
+		if(err)
+		{
+			console.log("Get Registered Emails Failed", err);
+			return res.status(500).json({
+				status: false,
+				message: "Get Registered Emails Failed! Server Error..",
+				error: err
+			});
+		}
+		if (items.length == 0)
+		{
+			return res.status(500).json({
+				status : false,
+				message: 'No user is registered'
+			})
+		}
+		var emails = [];
+		items.forEach(item => {
+			Object.keys(item.events).forEach(key => {
+				if( item.events[key].indexOf(req.params.eventId) != -1)
+				{
+					emails.push(item.email);
+					count+=1;
+				}
+				else if( item.events[key].indexOf(req.params.eventId+'_0') != -1)
+				{
+					emails.push(item.email);
+					count+=1;
+				}
+				else if( item.events[key].indexOf(req.params.eventId+'_1') != -1)
+				{
+					emails.push(item.email);
+					count+=1;
+				}
+				else if( item.events[key].indexOf(req.params.eventId+'_2') != -1)
+				{
+					emails.push(item.email);
+					count+=1;
+				}
+			})
+		})
+		return res.status(200).json({
+			status: true,
+			message: 'Emails fetched successfully',
+			data: count,
+			emails
+		})
+	})
+})
+
+//Get registered events
+router.get("/getRegEvents/:email",function(req,res){
+	User.findOne({email: req.params.email}, (err,item) => {
+		if(err)
+		{
+			console.log("Get Registered Events Failed", err);
+			return res.status(500).json({
+				status: false,
+				message: "Get Registered Events Failed! Server Error..",
+				error: err
+			});
+		}
+		if (item == null)
+		{
+			return res.status(500).json({
+				status : false,
+				message: 'User is not registered'
+			})
+		}
+		return res.status(200).json({
+			status: true,
+			message: 'Events Fetched successfully',
+			data: item.events
+		})
+	})
+})
+
+//Get emails for registered event Id
+router.get('/getRegEmails/:eventId',function(req,res){
+	var count =0;
+	User.find({},{email: 1, events: 1}, (err,items) => {
+		if(err)
+		{
+			console.log("Get Registered Emails Failed", err);
+			return res.status(500).json({
+				status: false,
+				message: "Get Registered Emails Failed! Server Error..",
+				error: err
+			});
+		}
+		if (items.length == 0)
+		{
+			return res.status(500).json({
+				status : false,
+				message: 'No user is registered'
+			})
+		}
+		var emails = [];
+		items.forEach(item => {
+			Object.keys(item.events).forEach(key => {
+				if( item.events[key].indexOf(req.params.eventId) != -1)
+				{
+					emails.push(item.email);
+					count+=1;
+				}
+				else if( item.events[key].indexOf(req.params.eventId+'_0') != -1)
+				{
+					emails.push(item.email);
+					count+=1;
+				}
+				else if( item.events[key].indexOf(req.params.eventId+'_1') != -1)
+				{
+					emails.push(item.email);
+					count+=1;
+				}
+				else if( item.events[key].indexOf(req.params.eventId+'_2') != -1)
+				{
+					emails.push(item.email);
+					count+=1;
+				}
+			})
+		})
+		return res.status(200).json({
+			status: true,
+			message: 'Emails fetched successfully',
+			data: count,
+			emails
+		})
+	})
+})
+
 module.exports = router;

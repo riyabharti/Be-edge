@@ -38,13 +38,6 @@ const setNewRCID = (res, newUser) => {
 	});
 }
 
-var transporter = nodemailer.createTransport({
-	service: 'gmail',
-	auth: {
-		user: process.env.SENDER_EMAIL,
-		pass: process.env.SENDER_PASS
-	}
-});
 
 const uploadFile = multer({ storage: multer.memoryStorage() });
 
@@ -258,6 +251,13 @@ router.get("/forgotPassword/:email",function(req,res){
 			item.otp=secret;
 			item.save().then(data=> {
 				//Send OTP to registered mail
+				var transporter = nodemailer.createTransport({
+					service: 'gmail',
+					auth: {
+						user: process.env.SENDER_EMAIL,
+						pass: process.env.SENDER_PASS
+					}
+				});
 				transporter.sendMail(mailOptions).then(info => {
 					res.status(200).json({
 						status:true,
