@@ -409,6 +409,7 @@ router.get('/getRegEmails/:eventId',function(req,res){
 	})
 })
 
+<<<<<<< HEAD
 //Get registered events
 router.get("/getRegEvents/:email",function(req,res){
 	User.findOne({email: req.params.email}, (err,item) => {
@@ -490,4 +491,6 @@ router.get('/getRegEmails/:eventId',function(req,res){
 	})
 })
 
+=======
+>>>>>>> 4dc43f02343e46a95d70eb7fc08bae5ec493a286
 module.exports = router;
