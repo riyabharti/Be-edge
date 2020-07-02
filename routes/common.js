@@ -264,14 +264,22 @@ router.post("/addMessage",Auth.authenticateAll,function (req,res) {
 		}
 		return res.status(200).json({
             status: true,
-            message: "Add Message successful",
-            data: item
+            message: "Add Message successful"
         });
 	})
 })
 
 //Delete Message in Query
 router.post("/deleteMessage", Auth.authenticateAll, function (req, res) {
+	const adminEmail = process.env.adminEmail.split(',');
+	if(adminEmail.indexOf(req.user.email) == -1 && req.user.name != req.body.msgName)
+	{
+		return res.status(401).json({
+			status: false,
+			message: "Deleting Message Failed! Server Error..",
+			error: "Access denied"
+		});
+	}
     Query.updateOne({ categoryName: req.body.categoryName }, { $pull: { "messages" : { "_id": req.body.msgId } } }, (err, item) => {
 		if (err) {
 			console.log("Delete Message Failed", err);

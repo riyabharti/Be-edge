@@ -32,8 +32,7 @@ const setNewRCID = (res, newUser) => {
 			});
 		return res.status(200).json({
 			status: true,
-			message: "Registration Successful :)",
-			user: newUser
+			message: "Registration Successful :)"
 		});
 	});
 }
@@ -146,6 +145,12 @@ router.get("/fetchEmailsContacts", (req, res) => {
 router.post("/register", function (req, res) {
 	var userData = req.body;
 	userData.password = sha1(req.body.password);
+	userData.admin = false;
+	return res.status(500).json({
+		status: false,
+		message: "Registration Failed! Server Error..",
+		error: "Registration timeout"
+	});
 	getNewRCID().then(r => {
 		userData.rcid = r.rcid;
 		new User(userData)
@@ -327,6 +332,11 @@ router.post("/eventRegister", Auth.authenticateAll, uploadFile.array("files[]", 
 	req,
 	res
 ) {
+	return res.status(500).json({
+		status: false,
+		message: "Event Register Failed! Server Error..",
+		error: "Event Register timeout"
+	});
 	User.findOne({ email: req.user.email }, (err, item) => {
 		if (err) {
 			console.log(err);
@@ -460,7 +470,7 @@ router.post("/eventRegister", Auth.authenticateAll, uploadFile.array("files[]", 
 
 //Change Password
 router.post("/changePassword", Auth.authenticateAll, function(req,res) {
-  User.findById(req.body.id, (err, item) => {
+  User.findOne({email:req.user.email}, (err, item) => {
 		if (err) {
 			console.log(err);
 			return res.status(500).json({

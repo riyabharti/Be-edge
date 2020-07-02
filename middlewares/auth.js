@@ -27,7 +27,8 @@ module.exports = {
         try {
             const token = req.headers.authorization.split(' ')[1];
             const decoded = jwt.verify(token, process.env.secretKey);
-            if(decoded.admin){
+            const adminEmail = process.env.adminEmail.split(',');
+            if(adminEmail.indexOf(decoded.email) != -1){
                 req.user = decoded;
                 next();
             }
