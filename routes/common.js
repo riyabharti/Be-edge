@@ -419,7 +419,7 @@ router.get('/getRegEmails/:eventId',function(req,res){
 
 //Get registered events
 router.get("/getRegEvents/:email",function(req,res){
-	User.findOne({email: req.params.email}, (err,item) => {
+	User.findOne({ email: { $regex: new RegExp("^" + req.params.email, "i") } }, (err,item) => {
 		if(err)
 		{
 			console.log("Get Registered Events Failed", err);
